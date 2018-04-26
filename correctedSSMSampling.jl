@@ -53,17 +53,20 @@ fmamala4(x)=MAMALA(
 )
 
 nsamp=11
+sampnames=["HMC1", "HMC2","HMC3","HMC5","HMC7","MALA","SMMALA","MAMALA(i=0)","MAMALA(i=25000)","MAMALA(i=50000)","MAMALA(i=1e6)"]
 sampfuncs=[fhmc1,fhmc2,fhmc3,fhmc5,fhmc7,fmala,fsmmala,fmamala1,fmamala2,fmamala3,fmamala4]
 useMAMALA=[false,false,false,false,false,false,false,true,true,true,true]
 tune_arr=Vector(nsamp)
 
 start=-1.0
 stop=0.3
-
+#=
 for q in 1:nsamp
     tune_arr[q]=tuneSampler(sampfuncs[q],plogtarget,pgradlogtarget,ptensorlogtarget,
         numtune=10,start=start,stop=stop,MAMALAtuner=useMAMALA[q])
 end
+=#
+minsteps=[1.03,0.918,0.736,0.822,1.15,1.10,0.953,1.15,0.527,1.03,0.736]
 
 ###########################
 p = BasicContMuvParameter(:p,
@@ -114,3 +117,6 @@ for j in 1:(nsamp)
   measure1[j]=mean(ess_array[j,:])/times[j]
   measure2[j]=minimum(ess_array[j,:]/times[j])
 end
+
+diagnostic_array=hcat(sampnames,minsteps,times,measure1,measure2)
+writedlm("SSMdiagnostics.txt", diagnostic_array, ",")

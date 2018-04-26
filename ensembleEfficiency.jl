@@ -1,12 +1,11 @@
 #test ensemble MCMC efficiency
+#for TTVmodel 3
 
-include("../ensembleMCMC/popmcmc.jl")
+include("/ensembleMCMC/popmcmc.jl")
 
 covTTV=readdlm("pilotCov3.txt",',')
 pmeans=readdlm("pilotMeans3.txt",',')
 pmeans=vec(pmeans)
-
-
 
 
 covTTVhalf= ctranspose(chol(covTTV))
@@ -43,3 +42,9 @@ end
 
 measure1=mean(tot_ess)/times
 measure2=minimum(tot_ess)/times
+
+diagnostic_array=readdlm("kepler307diagnostics.txt",',')
+new_entry=["DEMCMC",NaN,times,measure1,measure2]
+diagnostic_array=vcat(diagnostic_array,new_entry')
+
+writedlm("kepler307diagnostics.txt", diagnostic_array, ",")

@@ -1,6 +1,6 @@
 #test ensemble MCMC efficiency
 
-include("../ensembleMCMC/popmcmc.jl")
+include("/ensembleMCMC/popmcmc.jl")
 
 covTTV=readdlm("pilotCovCorrSSM.txt",',')
 pmeans=readdlm("pilotMeansCorrSSM.txt",',')
@@ -40,3 +40,9 @@ end
 
 measure1=mean(tot_ess)/times
 measure2=minimum(tot_ess)/times
+
+diagnostic_array=readdlm("SSMdiagnostics.txt",',')
+new_entry=["DEMCMC",NaN,times,measure1,measure2]
+diagnostic_array=vcat(diagnostic_array,new_entry')
+
+writedlm("SSMdiagnostics.txt", diagnostic_array, ",")

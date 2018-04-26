@@ -9,15 +9,15 @@ pmeans=vec(pmeans)
 pstart=readdlm("pilotLast3.txt",',')
 pstart=vec(pstart)
 
-diagcov=eye(Float64,10,10) #using only diagonals of cov matrix
+#=diagcov=eye(Float64,10,10) #using only diagonals of cov matrix
 for n in 1:10
     diagcov[n,n]=covTTV[n,n]
-end
+end=#
 
-covTTVhalf= chol(diagcov)
+covTTVhalf= ctranspose(chol(covTTV))
 B=covTTVhalf #sigma^(1/2)
 
-include("TTVmodel3.jl")
+include("TTVmodel3old.jl")
 include("MCMCdiagnostics.jl")
 
 p= BasicContMuvParameter(:p,
@@ -38,17 +38,17 @@ mcrange= BasicMCRange(nsteps=numsteps, thinning=10)
 outopts = Dict{Symbol, Any}(:monitor=>[:value],
   :diagnostics=>[:accept])
 
-#MCtuner=AcceptanceRateMCTuner(0.6,verbose=true)
+
 #MCtuner=VanillaMCTuner(verbose=true)
-MCtuner=MAMALAMCTuner(
+#=MCtuner=MAMALAMCTuner(
   VanillaMCTuner(verbose=false),
   VanillaMCTuner(verbose=false),
   VanillaMCTuner(verbose=true)
-)
+)=#
 
-#minstep=0.000774263682681127
-minstep=0.245
-#mcsampler=MALA(minstep)
+
+minstep=0.822
+mcsampler=HMC(minstep,2)
 mcsampler=MAMALA(
   update=(sstate, pstate, i, tot) -> rand_exp_decay_update!(sstate, pstate, i, 50000, 10.),
   transform=H -> simple_posdef(H, a=1500.),
@@ -64,17 +64,13 @@ out=output(job)
 outval=out.value
 outacc=out.diagnosticvalues
 
-#=for i in 1:np
-  for j in 1:(size(outval)[2])
-    outval[i,j]=outval[i,j]./scale[i] #rescale to get parameter values
-  end
-end=#
+
 for j in 1:(size(outval)[2])
   outval[:,j]=B*outval[:,j]+pmeans
 end
 
-writedlm("../../../Documents/Exoplanet_ttv_data/values_transformedTTVFasterMAMALAminstep2.txt", outval, ",")
-writedlm("../../../Documents/Exoplanet_ttv_data/accept_transformedTTVFasterMAMALAminstep2.txt", outacc, ",")
+writedlm("../Exoplanet_ttv_data/values_transformedTTVFasterHMC.txt", outval, ",")
+writedlm("../Exoplanet_ttv_data/accept_transformedTTVFasterHMC.txt", outacc, ",")
 
 using PyPlot
 using PyCall

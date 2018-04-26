@@ -1,6 +1,6 @@
 #burnin ensembleMCMC for TTVmodel3
 
-include("../ensembleMCMC/popmcmc.jl")
+include("/ensembleMCMC/popmcmc.jl")
 
 covTTV=readdlm("pilotCov3.txt",',')
 pmeans=readdlm("pilotMeans3.txt",',')
