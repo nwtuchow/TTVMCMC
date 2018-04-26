@@ -1,5 +1,5 @@
 #burnin ensembleMCMC for KOI 1270 model
-include("../ensembleMCMC/popmcmc.jl")
+include("ensembleMCMC/popmcmc.jl")
 
 covTTV=readdlm("KOI1270Cov2.txt",',')
 pmeans=readdlm("KOI1270Means2.txt",',')

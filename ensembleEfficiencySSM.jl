@@ -1,6 +1,6 @@
 #test ensemble MCMC efficiency
 
-include("/ensembleMCMC/popmcmc.jl")
+include("ensembleMCMC/popmcmc.jl")
 
 covTTV=readdlm("pilotCovCorrSSM.txt",',')
 pmeans=readdlm("pilotMeansCorrSSM.txt",',')

@@ -1,7 +1,7 @@
 #test ensemble MCMC efficiency
 #for TTVmodel 3
 
-include("/ensembleMCMC/popmcmc.jl")
+include("ensembleMCMC/popmcmc.jl")
 
 covTTV=readdlm("pilotCov3.txt",',')
 pmeans=readdlm("pilotMeans3.txt",',')

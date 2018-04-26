@@ -1,6 +1,6 @@
 #test ensemble MCMC efficiency
 
-include("/ensembleMCMC/popmcmc.jl")
+include("ensembleMCMC/popmcmc.jl")
 
 covTTV=readdlm("KOI248Cov.txt",',')
 pmeans=readdlm("KOI248Means.txt",',')
