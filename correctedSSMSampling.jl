@@ -90,7 +90,7 @@ ess_array=Array{Float64}(nsamp, length(pinit))
 accrate=Vector{Float64}(nsamp)
 
 for i in 1:nsamp
-    mcsampler=sampfuncs[i](tune_arr[i]["minstep"])
+    mcsampler=sampfuncs[i](minsteps[i])
     if useMAMALA[i]
         MCtuner=MAMALAMCTuner(
           VanillaMCTuner(verbose=false),
