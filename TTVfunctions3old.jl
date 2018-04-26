@@ -2,7 +2,7 @@
 #requires B and pmeans
 #include("modifiedTTVFasterFunctions.jl")
 
-include("../../../Documents/TTVFaster/Julia/compute_ttv.jl") #path on home laptop
+include("../TTVFaster/Julia/compute_ttv.jl") #path on home laptop
 using TTVFaster
 using ForwardDiff, Distributions
 

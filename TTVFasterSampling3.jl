@@ -8,110 +8,121 @@ pmeans=vec(pmeans)
 
 pstart=readdlm("pilotLast3.txt",',')
 pstart=vec(pstart)
-#=
-diagcov=eye(Float64,10,10) #using only diagonals of cov matrix
-for n in 1:10
-    diagcov[n,n]=covTTV[n,n]
-end
-=#
+
+
 covTTVhalf= ctranspose(chol(covTTV))
 B=covTTVhalf #sigma^(1/2)
 
 include("TTVmodel3old.jl")
 include("MCMCdiagnostics.jl")
 
-p= BasicContMuvParameter(:p,
+include("tuneSampler.jl")
+
+fhmc1(x)=HMC(x,1)
+fhmc2(x)=HMC(x,2)
+fhmc3(x)=HMC(x,3)
+fhmc5(x)=HMC(x,5)
+fhmc7(x)=HMC(x,7)
+fmala(x)=MALA(x)
+fsmmala(x)=SMMALA(x, H -> simple_posdef(H, a=1500.))
+fmamala1(x)=MAMALA(
+  update=(sstate, pstate, i, tot) -> rand_exp_decay_update!(sstate, pstate, i, 50000, 10.),
+  transform=H -> simple_posdef(H, a=1500.),
+  driftstep=x,
+  minorscale=0.01,
+  c=0.01
+)
+fmamala2(x)=MAMALA(
+  update=(sstate, pstate, i, tot) -> rand_exp_decay_update!(sstate, pstate, i+25000, 50000, 10.),
+  transform=H -> simple_posdef(H, a=1500.),
+  driftstep=x,
+  minorscale=0.01,
+  c=0.01
+)
+fmamala3(x)=MAMALA(
+  update=(sstate, pstate, i, tot) -> rand_exp_decay_update!(sstate, pstate, i+50000, 50000, 10.),
+  transform=H -> simple_posdef(H, a=1500.),
+  driftstep=x,
+  minorscale=0.01,
+  c=0.01
+)
+fmamala4(x)=MAMALA(
+  update=(sstate, pstate, i, tot) -> rand_exp_decay_update!(sstate, pstate, i+1000000, 50000, 10.),
+  transform=H -> simple_posdef(H, a=1500.),
+  driftstep=x,
+  minorscale=0.01,
+  c=0.01
+)
+
+nsamp=11
+sampnames=["HMC1", "HMC2","HMC3","HMC5","HMC7","MALA","SMMALA","MAMALA(i=0)","MAMALA(i=25000)","MAMALA(i=50000)","MAMALA(i=1e6)"]
+sampfuncs=[fhmc1,fhmc2,fhmc3,fhmc5,fhmc7,fmala,fsmmala,fmamala1,fmamala2,fmamala3,fmamala4]
+useMAMALA=[false,false,false,false,false,false,false,true,true,true,true]
+tune_arr=Vector(nsamp)
+minsteps=Vector(nsamp)
+
+start=-3.0
+stop=0.7
+
+#=for q in 1:nsamp
+    println("Sampler: ", sampnames[q])
+    tune_arr[q]=tuneSampler(sampfuncs[q],plogtarget,pgradlogtarget,ptensorlogtarget,
+        numtune=10,start=start,stop=stop,MAMALAtuner=useMAMALA[q],narrow=1)
+    minsteps[q]=tune_arr[q]["minstep"]
+    println("Minstep: ", minsteps[q])
+end=#
+minsteps=[0.918,0.822,0.717,0.736,1.03,0.974,0.464,0.880,0.880,0.880,0.880]
+
+
+###########################
+p = BasicContMuvParameter(:p,
   logtarget=plogtarget,
   gradlogtarget=pgradlogtarget,
   tensorlogtarget=ptensorlogtarget)
 
-model= likelihood_model(p, false)
+model = likelihood_model(p, false)
 
 zstart=to_z(pstart)
 p0= Dict(:p=>zstart)
-nstep=5000
+
+nstep=10000
 mcrange= BasicMCRange(nsteps=nstep)
-#mcrange= BasicMCRange(nsteps=20000)
 
-outopts = Dict{Symbol, Any}(:monitor=>[:value],
-  :diagnostics=>[:accept])
+outopts= Dict{Symbol, Any}(:monitor=>[:value], :diagnostics=>[:accept])
 
-#MCtuner=AcceptanceRateMCTuner(0.6,verbose=true)
-MCtuner=VanillaMCTuner(verbose=true)
-#=MCtuner=MAMALAMCTuner(
-  VanillaMCTuner(verbose=false),
-  VanillaMCTuner(verbose=false),
-  VanillaMCTuner(verbose=true)
-)=#
+times=Vector(nsamp)
+aclengths=Array{Float64}(nsamp, length(pinit))
+ess_array=Array{Float64}(nsamp, length(pinit))
+accrate=Vector{Float64}(nsamp)
 
-numsteps=10
-driftsteps= logspace(-1.0,0.3,numsteps)
-aclengths=Array{Float64}(numsteps, length(pinit))
-ess_array=Array{Float64}(numsteps, length(pinit))
-accrate=Vector{Float64}(numsteps)
-
-for i in 1:numsteps
-  #mcsampler=MALA(driftsteps[i])
-  mcsampler=HMC(driftsteps[i],7)
-  #mcsampler=SMMALA(driftsteps[i], H -> simple_posdef(H, a=1500.))
-  #=mcsampler=MAMALA(
-    update=(sstate, pstate, i, tot) -> rand_exp_decay_update!(sstate, pstate, i, tot, 10.),
-    transform=H -> simple_posdef(H, a=1500.),
-    driftstep=driftsteps[i],
-    minorscale=0.01,
-    c=0.01
-  )=#
-  job=BasicMCJob(model,mcsampler,mcrange, p0, tuner=MCtuner, outopts=outopts)
-  println("Job: ", i," , Step size: ", driftsteps[i])
-  run(job)
-  outval=output(job).value
-  acc=output(job).diagnosticvalues
-  accrate[i]=mean(acc)
-  println("Net Acceptance: ", 100.0*accrate[i],  "\%")
-  aclengths[i,:]=aclength(outval, threshold=0.1, maxit=nstep, jump=1,useabs=true)
-  ess_array[i,:]=nstep./aclengths[i,:]
-end
-#=
-writedlm("../outputs/aclength_SMMALA_transformedTTVFaster.txt", aclengths, ",")
-writedlm("../outputs/ess_SMMALA_transformedTTVFaster.txt", ess_array, ",")
-writedlm("../outputs/accept_SMMALA_transformedTTVFaster.txt", accrate, ",")
-writedlm("../outputs/step_SMMALA_transformedTTVFaster.txt", driftsteps, ",")
-=#
-maxac=Vector(numsteps)
-miness=Vector(numsteps)
-for i in 1:numsteps
-    if(any(isnan(aclengths[i,:])) || accrate[i]<0.1 ||accrate[i]>0.9)
-        maxac[i]=Inf
-        miness[i]=0.0
+for i in 1:nsamp
+    mcsampler=sampfuncs[i](minsteps[i])
+    if useMAMALA[i]
+        MCtuner=MAMALAMCTuner(
+          VanillaMCTuner(verbose=false),
+          VanillaMCTuner(verbose=false),
+          VanillaMCTuner(verbose=false)
+        )
     else
-        maxac[i]=maximum(aclengths[i,:])
-        miness[i]=minimum(ess_array[i,:])
+        MCtuner=VanillaMCTuner(verbose=false)
     end
+    job=BasicMCJob(model,mcsampler,mcrange, p0, tuner=MCtuner, outopts=outopts)
+    tic()
+    run(job)
+    times[i]=toc()
+    outval=output(job).value
+    aclengths[i,:]=aclength(outval, threshold=0.1, maxit=10000, jump=1, useabs=true)
+    #ess_array[i,:]=ess(output(job))
+    ess_array[i,:]=nstep./aclengths[i,:]
+    accrate[i]=acceptance(output(job))
 end
 
-minind=indmin(maxac)
-minstep=driftsteps[minind]
+measure1=Vector{Float64}(nsamp) #mean ess/time
+measure2=Vector{Float64}(nsamp) #min ess/time
+for j in 1:(nsamp)
+  measure1[j]=mean(ess_array[j,:])/times[j]
+  measure2[j]=minimum(ess_array[j,:]/times[j])
+end
 
-maxind=indmax(miness)
-maxstep=driftsteps[maxind]
-
-using Plots
-plotly()
-
-acplot=scatter(driftsteps,aclengths,
-  layout=10,
-  xaxis=( :log10),
-  title=["mu_b" "P_b" "ti_b" "k_b" "h_b" "mu_c" "P_c" "ti_c" "k_c" "h_c"],
-  leg=false)
-
-essplot=scatter(driftsteps,ess_array,
-  layout=10,
-  xaxis=( :log10),
-  title=["mu_b" "P_b" "ti_b" "k_b" "h_b" "mu_c" "P_c" "ti_c" "k_c" "h_c"],
-  leg=false)
-
-acceptplot= scatter(driftsteps, accrate,
-  xaxis=:log10,
-  xlabel="Step size",
-  ylabel="Net acceptance rate",
-  leg=false)
+diagnostic_array=hcat(sampnames,minsteps,times,measure1,measure2)
+writedlm("kepler307diagnostics.txt", diagnostic_array, ",")
