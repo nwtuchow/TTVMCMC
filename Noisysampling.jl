@@ -59,7 +59,7 @@ sampfuncs=[fhmc1,fhmc2,fhmc3,fhmc5,fhmc7,fmala,fsmmala,fmamala1,fmamala2,fmamala
 useMAMALA=[false,false,false,false,false,false,false,true,true,true,true]
 tune_arr=Vector(nsamp)
 minsteps=Vector(nsamp)
-
+#=
 start=-3.0
 stop=0.7
 
@@ -70,7 +70,8 @@ for q in 1:nsamp
     minsteps[q]=tune_arr[q]["minstep"]
     println("Minstep: ", minsteps[q])
 end
-
+=#
+minsteps=[1.15,0.838,0.755,0.838,0.755,0.550,0.755,0.402,0.550,0.612,1.42]
 ###########################
 p = BasicContMuvParameter(:p,
   logtarget=plogtarget,

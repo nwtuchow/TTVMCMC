@@ -19,7 +19,7 @@ popsize= floor(Int64,3*ndim) #number of walkers
 pop_init=readdlm("KOI1270ensembleLast.txt",',')
 numsteps=10000
 tic()
-results_demcmc = run_affine_pop_mcmc( pop_init,  plogtarget, num_gen= numsteps)
+results_demcmc = run_demcmc( pop_init,  plogtarget, num_gen= numsteps)
 times=toc()
 
 outchains=results_demcmc["theta_all"]
@@ -43,7 +43,7 @@ measure1=mean(tot_ess)/times
 measure2=minimum(tot_ess)/times
 
 diagnostic_array=readdlm("KOI1270diagnostics.txt",',')
-new_entry=["AIMCMC",NaN,times,measure1,measure2]
+new_entry=["DEMCMC",NaN,times,measure1,measure2]
 diagnostic_array=vcat(diagnostic_array,new_entry')
 
 writedlm("KOI1270diagnostics.txt", diagnostic_array, ",")
