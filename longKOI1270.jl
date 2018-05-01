@@ -34,8 +34,8 @@ for j in 1:(size(outvalz)[2])
 end
 
 outacc=results_demcmc["accepts_generation"]
-writedlm("../../../Documents/Exoplanet_ttv_data/values_KOI1270MAMALA.txt", outval, ",")
-writedlm("../../../Documents/Exoplanet_ttv_data/acceptgen_KOI1270MAMALA.txt", outacc, ",")
+writedlm("../../../Documents/Exoplanet_ttv_data/values_KOI1270DEMCMC.txt", outval, ",")
+writedlm("../../../Documents/Exoplanet_ttv_data/acceptgen_KOI1270DEMCMC.txt", outacc, ",")
 
 using PyPlot
 using PyCall

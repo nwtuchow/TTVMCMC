@@ -77,4 +77,4 @@ corner.corner(outval', labels=[L"\mathbf{\mu_b}",L"\mathbf{P_b}",L"\mathbf{t_{i,
 quantiles=[0.16, 0.5, 0.84],
 show_titles=true)
 
-savefig("../Dropbox/ExoplanetTTVs/plots/longRunOutput/HMC_TTVModel3_2mil.png")
+savefig("../../Dropbox/ExoplanetTTVs/plots/longRunOutput/HMC_TTVModel3_2mil.png")

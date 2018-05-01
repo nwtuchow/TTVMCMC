@@ -214,3 +214,16 @@ plot!(k57timec,1440*(k57timec-tlinc),
         linecolor=:red)
 
 k57doubleplot=plot(k57plotb,k57plotc, layout=(2,1),leg=false, guidefont=font(10, "Arial"))
+
+function cornerUncertainty{T<:Number}(outval::Array{T,2}, quantiles=[0.16, 0.5, 0.84])
+    numparam=size(outval)[1]
+    outarr=Array{T}(numparam,3)
+    for q in 1:numparam
+        qls=quantile(outval[q,:],quantiles)
+        outarr[q,1]=qls[2]
+        outarr[q,2]=qls[3]-qls[2]
+        outarr[q,3]=qls[2]-qls[1]
+    end
+    #row 1: median 2:upper 3:lower
+    return outarr
+end
