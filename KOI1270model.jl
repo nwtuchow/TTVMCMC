@@ -1,4 +1,4 @@
-#julia 6 compatible
+#julia 5 compatible
 #TTVFaster statistical model
 #now define scale externally as matrix
 #takes B = sigma^(1/2) externally (Lower diagonal)
@@ -7,19 +7,19 @@
 #using ForwardDiff
 include("TTVfunctions3.jl")
 
-pinit=readdlm("KOI248ptrue.txt",',')
+pinit=readdlm("KOI1270ptrue.txt",',')
 pinit=vec(pinit)
 
 pguess=copy(pinit)
-pguess[1]=3.0e-5
-pguess[4]=0.04
-pguess[5]=-0.02
-pguess[6]=2.0e-5
-pguess[9]=0.03
-pguess[10]=-0.008
+pguess[1]=1.0e-6
+pguess[4]= -0.01
+pguess[5]= -0.01
+pguess[6]=1.7e-5
+pguess[9]=  -0.03
+pguess[10]= -0.008
 
-bData=readdlm("KOI248bData.txt",',')
-cData=readdlm("KOI248cData.txt",',')
+bData=readdlm("KOI1270bData.txt",',')
+cData=readdlm("KOI1270cData.txt",',')
 
 np=length(pinit)
 
@@ -303,7 +303,6 @@ function pgradlogtarget_th(theta::Vector{Float64})
     return tot
 end
 
-
 function ptensorlogprior(z::Vector{Float64})
     param=to_p(z)
     l=length(z)
@@ -385,7 +384,6 @@ function ptensorloglikelihood(z::Vector{Float64})
     end
 
     hstore=Array{eltype(z)}(l,l) #store hessian
-    #hesstransit!(param,hstore,bData,cData,jconfig)
     hesstransitz!(z,hstore,bData,cData,jconfigz, hcfg=hcfgz)
     if any(isnan.(hstore))
         return eye(Float64,10)
@@ -403,7 +401,6 @@ function ptensorloglikelihood_th(theta::Vector{Float64})
     end
 
     hstore=Array{eltype(theta)}(l,l) #store hessian
-    #hesstransit!(param,hstore,bData,cData,jconfig)
     hesstransit_th!(theta,hstore,bData,cData,jconfigth, hcfg=hcfgth)
     if any(isnan.(hstore))
         return eye(Float64,l)

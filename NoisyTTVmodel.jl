@@ -1,5 +1,5 @@
 #julia 6 compatible
-#TTVFaster statistical model
+#Noisey Kepler 307 model
 #now define scale externally as matrix
 #takes B = sigma^(1/2) externally (Lower diagonal)
 #takes pmeans externally
@@ -7,19 +7,19 @@
 #using ForwardDiff
 include("TTVfunctions3.jl")
 
-pinit=readdlm("KOI248ptrue.txt",',')
+pinit=readdlm("Noisyptrue.txt",',')
 pinit=vec(pinit)
 
 pguess=copy(pinit)
-pguess[1]=3.0e-5
-pguess[4]=0.04
-pguess[5]=-0.02
-pguess[6]=2.0e-5
-pguess[9]=0.03
-pguess[10]=-0.008
+pguess[1]+=2.0e-6
+pguess[4]+=0.005
+pguess[5]+=0.002
+pguess[6]-=1.0e-6
+pguess[9]-=0.004
+pguess[10]+=0.001
 
-bData=readdlm("KOI248bData.txt",',')
-cData=readdlm("KOI248cData.txt",',')
+bData=readdlm("NoisybData.txt",',')
+cData=readdlm("NoisycData.txt",',')
 
 np=length(pinit)
 

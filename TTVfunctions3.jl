@@ -1,7 +1,8 @@
 #Functions and gradients for fitting TTVs
 #requires B and pmeans
 #include("modifiedTTVFasterFunctions.jl")
-include("/home/nxt5109/Documents/TTVFaster/Julia/compute_ttv.jl") #path on Green
+
+include("../TTVFaster/Julia/compute_ttv.jl") #path on home laptop
 using TTVFaster
 using ForwardDiff, Distributions
 
@@ -87,8 +88,8 @@ function simDataset!{T<:Number}(p::Vector{T}, bdata::Array{T,2},cdata::Array{T,2
     f2=Array{T}(jmax+2,5)
     b=Array{T}(jmax+2,3)
 
-    compute_inner_ttv!(jmax, planet1, planet2, timeb, dtb, f1,f2, b, alpha0, b0)
-    compute_outer_ttv!(jmax, planet1, planet2, timec, dtc, f1,f2, b, alpha0, b0)
+    TTVFaster.compute_inner_ttv!(jmax, planet1, planet2, timeb, dtb, f1,f2, b, alpha0, b0)
+    TTVFaster.compute_outer_ttv!(jmax, planet1, planet2, timec, dtc, f1,f2, b, alpha0, b0)
 
     #add noise
 
@@ -138,7 +139,7 @@ function ftimeb{T1<:Number}(p::Vector{T1}, tnumb::Vector{Int64},alpha0::Number,b
     altf2=Array{T1}(jmax+2,5)
     altb=Array{T1}(jmax+2,3)
 
-    compute_inner_ttv!(jmax,planet1,planet2,tlinb,altttvb,altf1,altf2,altb,alpha0,b0)
+    TTVFaster.compute_inner_ttv!(jmax,planet1,planet2,tlinb,altttvb,altf1,altf2,altb,alpha0,b0)
     return tlinb+altttvb
 end
 
@@ -163,7 +164,7 @@ function ftimec{T1<:Number}(p::Vector{T1}, tnumc::Vector{Int64},alpha0::Number,b
     altf1=Array{T1}(jmax+2,5)
     altf2=Array{T1}(jmax+2,5)
     altb=Array{T1}(jmax+2,3)
-    compute_outer_ttv!(jmax,planet1,planet2,tlinc,altttvc,altf1,altf2,altb,alpha0,b0)
+    TTVFaster.compute_outer_ttv!(jmax,planet1,planet2,tlinc,altttvc,altf1,altf2,altb,alpha0,b0)
     return tlinc+altttvc
 end
 
