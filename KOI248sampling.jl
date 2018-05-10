@@ -94,7 +94,7 @@ accrate=Vector{Float64}(nsamp)
 for i in 1:nsamp
     mcsampler=sampfuncs[i](minsteps[i])
     if useGAMC[i]
-        MCtuner=GAMCMCTuner(
+        MCtuner=GAMCTuner(
           VanillaMCTuner(verbose=false),
           VanillaMCTuner(verbose=false),
           VanillaMCTuner(verbose=false)

@@ -25,7 +25,7 @@ function tuneSampler(samplerfunc,plogtarget,pgradlogtarget,ptensorlogtarget;
     if !GAMCtuner
         MCtuner=VanillaMCTuner(verbose=true)
     else
-        MCtuner=GAMCMCTuner(
+        MCtuner=GAMCTuner(
           VanillaMCTuner(verbose=false),
           VanillaMCTuner(verbose=false),
           VanillaMCTuner(verbose=true)
