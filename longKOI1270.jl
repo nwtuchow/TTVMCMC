@@ -11,7 +11,7 @@ pstart=vec(pstart)
 covTTVhalf= ctranspose(chol(covTTV))
 B=covTTVhalf #sigma^(1/2)
 
-include("KOI1270modelOld.jl")
+include("KOI1270model.jl")
 include("MCMCdiagnostics.jl")
 
 ndim= 10
@@ -34,8 +34,8 @@ for j in 1:(size(outvalz)[2])
 end
 
 outacc=results_demcmc["accepts_generation"]
-writedlm("../../../Documents/Exoplanet_ttv_data/values_KOI1270DEMCMC.txt", outval, ",")
-writedlm("../../../Documents/Exoplanet_ttv_data/acceptgen_KOI1270DEMCMC.txt", outacc, ",")
+writedlm("../Exoplanet_ttv_data/values_KOI1270DEMCMC.txt", outval, ",")
+writedlm("../Exoplanet_ttv_data/acceptgen_KOI1270DEMCMC.txt", outacc, ",")
 
 using PyPlot
 using PyCall
@@ -45,4 +45,4 @@ corner.corner(outval', labels=[L"\mathbf{\mu_b}",L"\mathbf{P_b}",L"\mathbf{t_{i,
 quantiles=[0.16, 0.5, 0.84],
 show_titles=true)
 
-savefig("../plots/cornerplots/DEMCMC_KOI1270_150000_30walker.png")
+#savefig("../plots/cornerplots/DEMCMC_KOI1270_150000_30walker.png")

@@ -1,6 +1,7 @@
 #pilot run
 using Klara
-using MAMALASampler
+#using MAMALASampler
+using GAMCSampler
 ndim=10
 #pmeans=zeros(ndim)
 #B=eye(ndim)
@@ -8,7 +9,7 @@ covTTV=readdlm("pilotCov3.txt",',')
 pmeans=readdlm("pilotMeans3.txt",',')
 pmeans=vec(pmeans)
 
-covTTVhalf= chol(covTTV)
+covTTVhalf= ctranspose(chol(covTTV))
 B=covTTVhalf #sigma^(1/2)
 
 include("TTVmodel3.jl")
@@ -16,9 +17,10 @@ include("TTVmodel3.jl")
 #=hguess=softabs(ptensorlogtarget(zguess),1000.0)
 covguess= (hguess) \ eye(ndim)
 covguess= 0.5*(covguess+covguess')
-B=chol(covguess)
+B=ctranspose(chol(covguess))
+pmeans=copy(pguess)
 
-include("TTVmodel2.jl")=#
+include("TTVmodel3.jl")=#
 
 p= BasicContMuvParameter(:p,
   logtarget=plogtarget,
@@ -27,7 +29,6 @@ p= BasicContMuvParameter(:p,
 
 model= likelihood_model(p, false)
 p0= Dict(:p=>zguess)
-#p0=Dict(:p=>zerror)
 
 mcrange= BasicMCRange(nsteps=500000,burnin=50000)
 
@@ -35,7 +36,7 @@ outopts = Dict{Symbol, Any}(:monitor=>[:value],
   :diagnostics=>[:accept])
 
 #MCtuner=VanillaMCTuner(verbose=true)
-MCtuner=MAMALAMCTuner(
+MCtuner=GAMCTuner(
   VanillaMCTuner(verbose=false),
   VanillaMCTuner(verbose=false),
   VanillaMCTuner(verbose=true)
@@ -44,7 +45,7 @@ MCtuner=MAMALAMCTuner(
 #mcsampler=HMC(1e-4,5)
 #mcsampler=MALA(1e-3) # for scaled
 #mcsampler=MALA(1e-9)
-mcsampler=MAMALA(
+mcsampler=GAMC(
     update=(sstate, pstate, i, tot) -> rand_exp_decay_update!(sstate, pstate, i, 50000, 10.),
     transform=H -> simple_posdef(H, a=1500.),
     driftstep=0.316,

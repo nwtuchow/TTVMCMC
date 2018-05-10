@@ -11,7 +11,7 @@ pstart=vec(pstart)
 covTTVhalf= ctranspose(chol(covTTV))
 B=covTTVhalf #sigma^(1/2)
 
-include("KOI1270modelOld.jl")
+include("KOI1270model.jl")
 include("MCMCdiagnostics.jl")
 
 ndim= 10

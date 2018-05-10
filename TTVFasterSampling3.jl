@@ -1,6 +1,8 @@
 #Testing MCMC in Klara
+#Julia 6 version
 using Klara
-using MAMALASampler
+#using MAMALASampler
+using GAMCSampler
 
 covTTV=readdlm("pilotCov3.txt",',')
 pmeans=readdlm("pilotMeans3.txt",',')
@@ -13,7 +15,7 @@ pstart=vec(pstart)
 covTTVhalf= ctranspose(chol(covTTV))
 B=covTTVhalf #sigma^(1/2)
 
-include("TTVmodel3old.jl")
+include("TTVmodel3.jl")
 include("MCMCdiagnostics.jl")
 
 include("tuneSampler.jl")
@@ -25,28 +27,28 @@ fhmc5(x)=HMC(x,5)
 fhmc7(x)=HMC(x,7)
 fmala(x)=MALA(x)
 fsmmala(x)=SMMALA(x, H -> simple_posdef(H, a=1500.))
-fmamala1(x)=MAMALA(
+fgamc1(x)=GAMC(
   update=(sstate, pstate, i, tot) -> rand_exp_decay_update!(sstate, pstate, i, 50000, 10.),
   transform=H -> simple_posdef(H, a=1500.),
   driftstep=x,
   minorscale=0.01,
   c=0.01
 )
-fmamala2(x)=MAMALA(
+fgamc2(x)=GAMC(
   update=(sstate, pstate, i, tot) -> rand_exp_decay_update!(sstate, pstate, i+25000, 50000, 10.),
   transform=H -> simple_posdef(H, a=1500.),
   driftstep=x,
   minorscale=0.01,
   c=0.01
 )
-fmamala3(x)=MAMALA(
+fgamc3(x)=GAMC(
   update=(sstate, pstate, i, tot) -> rand_exp_decay_update!(sstate, pstate, i+50000, 50000, 10.),
   transform=H -> simple_posdef(H, a=1500.),
   driftstep=x,
   minorscale=0.01,
   c=0.01
 )
-fmamala4(x)=MAMALA(
+fgamc4(x)=GAMC(
   update=(sstate, pstate, i, tot) -> rand_exp_decay_update!(sstate, pstate, i+1000000, 50000, 10.),
   transform=H -> simple_posdef(H, a=1500.),
   driftstep=x,
@@ -55,9 +57,9 @@ fmamala4(x)=MAMALA(
 )
 
 nsamp=11
-sampnames=["HMC1", "HMC2","HMC3","HMC5","HMC7","MALA","SMMALA","MAMALA(i=0)","MAMALA(i=25000)","MAMALA(i=50000)","MAMALA(i=1e6)"]
-sampfuncs=[fhmc1,fhmc2,fhmc3,fhmc5,fhmc7,fmala,fsmmala,fmamala1,fmamala2,fmamala3,fmamala4]
-useMAMALA=[false,false,false,false,false,false,false,true,true,true,true]
+sampnames=["HMC1", "HMC2","HMC3","HMC5","HMC7","MALA","SMMALA","GAMC(i=0)","GAMC(i=25000)","GAMC(i=50000)","GAMC(i=1e6)"]
+sampfuncs=[fhmc1,fhmc2,fhmc3,fhmc5,fhmc7,fmala,fsmmala,fgamc1,fgamc2,fgamc3,fgamc4]
+useGAMC=[false,false,false,false,false,false,false,true,true,true,true]
 tune_arr=Vector(nsamp)
 minsteps=Vector(nsamp)
 
@@ -67,7 +69,7 @@ stop=0.7
 #=for q in 1:nsamp
     println("Sampler: ", sampnames[q])
     tune_arr[q]=tuneSampler(sampfuncs[q],plogtarget,pgradlogtarget,ptensorlogtarget,
-        numtune=10,start=start,stop=stop,MAMALAtuner=useMAMALA[q],narrow=1)
+        numtune=10,start=start,stop=stop,GAMCtuner=useGAMC[q],narrow=1)
     minsteps[q]=tune_arr[q]["minstep"]
     println("Minstep: ", minsteps[q])
 end=#
@@ -97,8 +99,8 @@ accrate=Vector{Float64}(nsamp)
 
 for i in 1:nsamp
     mcsampler=sampfuncs[i](minsteps[i])
-    if useMAMALA[i]
-        MCtuner=MAMALAMCTuner(
+    if useGAMC[i]
+        MCtuner=GAMCMCTuner(
           VanillaMCTuner(verbose=false),
           VanillaMCTuner(verbose=false),
           VanillaMCTuner(verbose=false)
@@ -125,4 +127,4 @@ for j in 1:(nsamp)
 end
 
 diagnostic_array=hcat(sampnames,minsteps,times,measure1,measure2)
-writedlm("kepler307diagnostics.txt", diagnostic_array, ",")
+writedlm("kepler307diagnostics2.txt", diagnostic_array, ",")

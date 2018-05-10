@@ -1,11 +1,11 @@
 #kepler 57 pilot run
 #julia 5 version
 using Klara
-using MAMALASampler
+using GAMCSampler
 ndim=10
 pmeans=zeros(ndim)
 B=eye(ndim)
-include("KOI1270Data_modelOld.jl")
+include("KOI1270Data_model.jl")
 
 fmat= -ptensorlogtarget(zguess) #estimate of fisher information matrix
 covguess= fmat \ eye(ndim)
@@ -31,14 +31,14 @@ outopts = Dict{Symbol, Any}(:monitor=>[:value],
   :diagnostics=>[:accept])
 
 #MCtuner=VanillaMCTuner(verbose=true)
-MCtuner=MAMALAMCTuner(
+MCtuner=GAMCMCTuner(
   VanillaMCTuner(verbose=false),
   VanillaMCTuner(verbose=false),
   VanillaMCTuner(verbose=true)
 )
 
 #mcsampler=SMMALA(0.3, H -> simple_posdef(H, a=1500.))
-mcsampler=MAMALA(
+mcsampler=GAMC(
     update=(sstate, pstate, i, tot) -> rand_exp_decay_update!(sstate, pstate, i, 50000, 10.),
     transform=H -> simple_posdef(H, a=1500.),
     driftstep=0.3,

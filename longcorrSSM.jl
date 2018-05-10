@@ -1,6 +1,5 @@
 #long run for corrected SSM
 using Klara
-using MAMALASampler
 
 covTTV=readdlm("pilotCovCorrSSM.txt",',')
 pmeans=readdlm("pilotMeansCorrSSM.txt",',')

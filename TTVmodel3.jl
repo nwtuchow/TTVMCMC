@@ -1,9 +1,8 @@
 #julia 6 version
 #TTVFaster statistical model
-#now define scale externally as matrix
 #takes B = sigma^(1/2) externally (Lower diagonal)
 #takes pmeans externally
-#close to KOI 1576
+#close to Kepler 307
 
 #using ForwardDiff
 include("TTVfunctions3.jl")

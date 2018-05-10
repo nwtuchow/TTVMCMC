@@ -1,6 +1,6 @@
 #pilot run for new SSM reparameterized
 using Klara
-using MAMALASampler
+using GAMCSampler
 ndim=12
 pmeans=zeros(ndim)
 B=eye(ndim)
@@ -33,14 +33,14 @@ outopts = Dict{Symbol, Any}(:monitor=>[:value],
 
 #MCtuner=VanillaMCTuner(verbose=true)
 #mcsampler=MALA(1e-2)
-MCtuner=MAMALAMCTuner(
+MCtuner=GAMCMCTuner(
   VanillaMCTuner(verbose=false),
   VanillaMCTuner(verbose=false),
   VanillaMCTuner(verbose=true)
 )
 
 
-mcsampler=MAMALA(
+mcsampler=GAMC(
     update=(sstate, pstate, i, tot) -> rand_exp_decay_update!(sstate, pstate, i, 50000, 10.),
     transform=H -> simple_posdef(H, a=1500.),
     driftstep=0.5,

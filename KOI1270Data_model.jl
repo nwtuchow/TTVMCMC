@@ -1,5 +1,6 @@
 #julia 6 compatible
 #TTVFaster statistical model
+#now define scale externally as matrix
 #takes B = sigma^(1/2) externally (Lower diagonal)
 #takes pmeans externally
 
@@ -17,8 +18,13 @@ pguess[6]=1.7e-5
 pguess[9]=  -0.03
 pguess[10]= -0.008
 
-bData=readdlm("KOI1270bData.txt",',')
-cData=readdlm("KOI1270cData.txt",',')
+braw=readdlm("../KOI-1270.01.txt",',')
+craw=readdlm("../KOI-1270.02.txt",',')
+
+bData= braw[:,2:end]
+cData= craw[:,2:end]
+
+
 
 np=length(pinit)
 
@@ -29,11 +35,11 @@ zguess=to_z(pguess)
 thinit=to_theta(pinit)
 thguess=to_theta(pguess)
 
-#jconfig=ForwardDiff.JacobianConfig(nothing,pinit)
-jconfigz=ForwardDiff.JacobianConfig(nothing,zinit)
-jconfigth=ForwardDiff.JacobianConfig(nothing,thinit)
-hcfgz=ForwardDiff.HessianConfig(nothing,zinit,ForwardDiff.Chunk{2}())
-hcfgth=ForwardDiff.HessianConfig(nothing,thinit,ForwardDiff.Chunk{2}())
+jconfig=ForwardDiff.JacobianConfig(pinit)
+jconfigz=ForwardDiff.JacobianConfig(zinit)
+jconfigth=ForwardDiff.JacobianConfig(thinit)
+hcfgz=ForwardDiff.HessianConfig{2}(zinit)
+hcfgth=ForwardDiff.HessianConfig{2}(thinit)
 
 function ploglikelihood(z::Vector{Float64})
   param=to_p(z)
@@ -383,6 +389,7 @@ function ptensorloglikelihood(z::Vector{Float64})
     end
 
     hstore=Array{eltype(z)}(l,l) #store hessian
+    #hesstransit!(param,hstore,bData,cData,jconfig)
     hesstransitz!(z,hstore,bData,cData,jconfigz, hcfg=hcfgz)
     if any(isnan.(hstore))
         return eye(Float64,10)
@@ -400,6 +407,7 @@ function ptensorloglikelihood_th(theta::Vector{Float64})
     end
 
     hstore=Array{eltype(theta)}(l,l) #store hessian
+    #hesstransit!(param,hstore,bData,cData,jconfig)
     hesstransit_th!(theta,hstore,bData,cData,jconfigth, hcfg=hcfgth)
     if any(isnan.(hstore))
         return eye(Float64,l)

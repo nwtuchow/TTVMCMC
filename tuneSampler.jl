@@ -6,7 +6,7 @@
 #defined in TTVmodel3.jl
 #narrow tells tuner to narrow the range of tuning parameter steps to those corresponding to between 10-90% acceptance
 function tuneSampler(samplerfunc,plogtarget,pgradlogtarget,ptensorlogtarget;
-     start=-1.0, stop=0.7, numtune=10,nstep=5000, MAMALAtuner=false, narrow=1, verbose=true)
+     start=-1.0, stop=0.7, numtune=10,nstep=5000, GAMCtuner=false, narrow=1, verbose=true)
     p= BasicContMuvParameter(:p,
       logtarget=plogtarget,
       gradlogtarget=pgradlogtarget,
@@ -22,10 +22,10 @@ function tuneSampler(samplerfunc,plogtarget,pgradlogtarget,ptensorlogtarget;
     outopts = Dict{Symbol, Any}(:monitor=>[:value],
       :diagnostics=>[:accept])
 
-    if !MAMALAtuner
+    if !GAMCtuner
         MCtuner=VanillaMCTuner(verbose=true)
     else
-        MCtuner=MAMALAMCTuner(
+        MCtuner=GAMCMCTuner(
           VanillaMCTuner(verbose=false),
           VanillaMCTuner(verbose=false),
           VanillaMCTuner(verbose=true)
@@ -106,7 +106,7 @@ function tuneSampler(samplerfunc,plogtarget,pgradlogtarget,ptensorlogtarget;
     maxac=Vector(numtune)
     miness=Vector(numtune)
     for i in 1:numtune
-        if(any(isnan(aclengths[i,:])) || accrate[i]<0.1 ||accrate[i]>0.9)
+        if(any(isnan.(aclengths[i,:])) || accrate[i]<0.1 ||accrate[i]>0.9)
             maxac[i]=Inf
             miness[i]=0.0
         else

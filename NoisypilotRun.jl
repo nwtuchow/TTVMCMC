@@ -1,18 +1,18 @@
 #Noisey kepler 307 pilot run
-#julia 5 version
+#julia 6 version
 using Klara
-using MAMALASampler
+using GAMCSampler
 ndim=10
 pmeans=zeros(ndim)
 B=eye(ndim)
-include("NoisyTTVmodelOld.jl")
+include("NoisyTTVmodel.jl")
 
 fmat= -ptensorlogtarget(zinit) #estimate of fisher information matrix
 covguess= fmat \ eye(ndim)
 covguess= 0.5*(covguess+covguess')
 B=ctranspose(chol(covguess))
 pmeans=copy(pinit)
-include("NoisyTTVmodelOld.jl")
+include("NoisyTTVmodel.jl")
 
 p= BasicContMuvParameter(:p,
   logtarget=plogtarget,
@@ -28,14 +28,14 @@ outopts = Dict{Symbol, Any}(:monitor=>[:value],
   :diagnostics=>[:accept])
 
 #MCtuner=VanillaMCTuner(verbose=true)
-MCtuner=MAMALAMCTuner(
+MCtuner=GAMCMCTuner(
   VanillaMCTuner(verbose=false),
   VanillaMCTuner(verbose=false),
   VanillaMCTuner(verbose=true)
 )
 
 #mcsampler=SMMALA(0.3, H -> simple_posdef(H, a=1500.))
-mcsampler=MAMALA(
+mcsampler=GAMC(
     update=(sstate, pstate, i, tot) -> rand_exp_decay_update!(sstate, pstate, i, 50000, 10.),
     transform=H -> simple_posdef(H, a=1500.),
     driftstep=0.3,

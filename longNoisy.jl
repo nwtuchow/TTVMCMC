@@ -12,7 +12,7 @@ pstart=vec(pstart)
 covTTVhalf= ctranspose(chol(covTTV))
 B=covTTVhalf #sigma^(1/2)
 
-include("NoisyTTVmodelOld.jl")
+include("NoisyTTVmodel.jl")
 include("MCMCdiagnostics.jl")
 
 p= BasicContMuvParameter(:p,

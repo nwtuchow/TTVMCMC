@@ -10,7 +10,7 @@ pmeans=vec(pmeans)
 covTTVhalf= ctranspose(chol(covTTV))
 B=covTTVhalf #sigma^(1/2)
 
-include("KOI1270Data_modelOld.jl")
+include("KOI1270Data_model.jl")
 include("MCMCdiagnostics.jl")
 
 ndim= 10

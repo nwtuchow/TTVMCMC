@@ -1,6 +1,6 @@
 #Testing MCMC in Klara
 using Klara
-using MAMALASampler
+using GAMCSampler
 
 covTTV=readdlm("KOI248Cov.txt",',')
 pmeans=readdlm("KOI248Means.txt",',')
@@ -36,7 +36,7 @@ outopts = Dict{Symbol, Any}(:monitor=>[:value],
 
 #MCtuner=AcceptanceRateMCTuner(0.6,verbose=true)
 #MCtuner=VanillaMCTuner(verbose=true)
-MCtuner=MAMALAMCTuner(
+MCtuner=GAMCMCTuner(
   VanillaMCTuner(verbose=false),
   VanillaMCTuner(verbose=false),
   VanillaMCTuner(verbose=true)
@@ -45,7 +45,7 @@ MCtuner=MAMALAMCTuner(
 #minstep=0.000774263682681127
 minstep=0.349
 #mcsampler=MALA(minstep)
-mcsampler=MAMALA(
+mcsampler=GAMC(
   update=(sstate, pstate, i, tot) -> rand_exp_decay_update!(sstate, pstate, i, 50000, 10.),
   transform=H -> simple_posdef(H, a=1500.),
   driftstep=minstep,
@@ -66,8 +66,8 @@ for j in 1:(size(outval)[2])
   outval[:,j]=B*outval[:,j]+pmeans
 end
 
-writedlm("../../../Documents/Exoplanet_ttv_data/values_KOI248MAMALA.txt", outval, ",")
-writedlm("../../../Documents/Exoplanet_ttv_data/accept_KOI248MAMALA.txt", outacc, ",")
+writedlm("../Exoplanet_ttv_data/values_KOI248GAMC.txt", outval, ",")
+writedlm("../Exoplanet_ttv_data/accept_KOI248GAMC.txt", outacc, ",")
 
 using PyPlot
 using PyCall

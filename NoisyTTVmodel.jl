@@ -1,6 +1,5 @@
 #julia 6 compatible
 #Noisey Kepler 307 model
-#now define scale externally as matrix
 #takes B = sigma^(1/2) externally (Lower diagonal)
 #takes pmeans externally
 
