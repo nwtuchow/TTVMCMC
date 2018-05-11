@@ -10,7 +10,7 @@ pmeans=vec(pmeans)
 covTTVhalf= ctranspose(chol(covTTV))
 B=covTTVhalf #sigma^(1/2)
 
-include("NoisyTTVmodelOld.jl")
+include("NoisyTTVmodel.jl")
 include("MCMCdiagnostics.jl")
 
 ndim= 10
@@ -44,6 +44,7 @@ measure2=minimum(tot_ess)/times
 
 diagnostic_array=readdlm("Noisydiagnostics.txt",',')
 new_entry=["DEMCMC",NaN,times,measure1,measure2]
-diagnostic_array=vcat(diagnostic_array,new_entry')
+new_entry=reshape(new_entry, (1,5))
+diagnostic_array=vcat(diagnostic_array,new_entry)
 
 writedlm("Noisydiagnostics.txt", diagnostic_array, ",")

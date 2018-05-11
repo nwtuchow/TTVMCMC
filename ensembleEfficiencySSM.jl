@@ -43,6 +43,7 @@ measure2=minimum(tot_ess)/times
 
 diagnostic_array=readdlm("SSMdiagnostics.txt",',')
 new_entry=["DEMCMC",NaN,times,measure1,measure2]
-diagnostic_array=vcat(diagnostic_array,new_entry')
+new_entry=reshape(new_entry, (1,5))
+diagnostic_array=vcat(diagnostic_array,new_entry)
 
 writedlm("SSMdiagnostics.txt", diagnostic_array, ",")
