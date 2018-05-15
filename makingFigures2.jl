@@ -303,3 +303,33 @@ cornerk57=corner.corner(smallk57chain[indices,:]',
     top_ticks=false,
     show_titles=false,
     title_fmt=".6f")
+
+#####################################################
+using Klara
+using GAMCSampler
+using Plots
+plotly()
+
+covTTV=readdlm("pilotCov3.txt",',')
+pmeans=readdlm("pilotMeans3.txt",',')
+pmeans=vec(pmeans)
+
+pstart=readdlm("pilotLast3.txt",',')
+pstart=vec(pstart)
+
+
+covTTVhalf= ctranspose(chol(covTTV))
+B=covTTVhalf #sigma^(1/2)
+
+include("TTVmodel3.jl")
+include("MCMCdiagnostics.jl")
+
+include("tuneSampler.jl")
+fmala(x)=MALA(x)
+
+start=-3.0
+stop=0.7
+tune_arr=tuneSampler(fmala,plogtarget,pgradlogtarget,ptensorlogtarget,
+    numtune=20,start=start,stop=stop,GAMCtuner=false,narrow=1)
+
+tuneplots=plotTune(tune_arr)
