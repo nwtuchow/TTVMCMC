@@ -50,8 +50,8 @@ for j in 1:(size(outval)[2])
   outval[:,j]=B*outval[:,j]+pmeans
 end
 
-writedlm("../../../Documents/Exoplanet_ttv_data/values_NoisyKep307MAMALA.txt", outval, ",")
-writedlm("../../../Documents/Exoplanet_ttv_data/accept_NoisyKep307MAMALA.txt", outacc, ",")
+writedlm("../Exoplanet_ttv_data/values_NoisyKep307MAMALA.txt", outval, ",")
+writedlm("../Exoplanet_ttv_data/accept_NoisyKep307MAMALA.txt", outacc, ",")
 
 using PyPlot
 using PyCall
@@ -61,4 +61,4 @@ corner.corner(outval', labels=[L"\mathbf{\mu_b}",L"\mathbf{P_b}",L"\mathbf{t_{i,
 quantiles=[0.16, 0.5, 0.84],
 show_titles=true)
 
-savefig("../plots/cornerplots/HMC_NoisyTTV_5mil")
+#savefig("../plots/cornerplots/HMC_NoisyTTV_5mil")

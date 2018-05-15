@@ -227,3 +227,79 @@ function cornerUncertainty{T<:Number}(outval::Array{T,2}, quantiles=[0.16, 0.5, 
     #row 1: median 2:upper 3:lower
     return outarr
 end
+
+######################################################################################
+using PyPlot
+using PyCall
+using LaTeXStrings
+@pyimport corner
+
+SSMchain=readdlm("../Exoplanet_ttv_data/values_correctedSSM_HMC.txt",',')
+SSMptrue=readdlm("pf_bData2.txt", ',')
+SSMptrue=vec(SSMptrue)
+SSMlabels=[L"\mathbf{t_{i,b}}",L"\mathbf{P_b}",L"\mathbf{A_b}",L"\mathbf{B_b}",L"\mathbf{C_b}",
+    L"\mathbf{D_b}",L"\mathbf{t_{i,c}}",L"\mathbf{P_c}",L"\mathbf{A_c}",L"\mathbf{B_c}",
+    L"\mathbf{C_c}",L"\mathbf{D_c}"]
+cornerSSM=corner.corner(SSMchain',
+    labels=SSMlabels,
+    quantiles=[0.16, 0.5, 0.84],
+    truths=SSMptrue,
+    use_math_text=false,
+    top_ticks=false,
+    show_titles=false)
+
+TTVlabels=[L"\mathbf{\mu_b}",L"\mathbf{P_b}",L"\mathbf{t_{i,b}}",L"\mathbf{k_b}",L"\mathbf{h_b}",L"\mathbf{\mu_c}",L"\mathbf{P_c}",L"\mathbf{t_{i,c}}",L"\mathbf{k_c}",L"\mathbf{h_c}"]
+indices=[1,4,5,6,9,10]
+
+k307chain=readdlm("../Exoplanet_ttv_data/values_transformedTTVFasterHMC.txt",',')
+k307ptrue=readdlm("TTVFasterptrue.txt",',')
+k307ptrue=vec(k307ptrue)
+cornerk307=corner.corner(k307chain[indices,:]',
+    labels=TTVlabels[indices],
+    quantiles=[0.16, 0.5, 0.84],
+    truths=k307ptrue[indices],
+    use_math_text=true,
+    top_ticks=false,
+    show_titles=false,
+    title_fmt=".6f")
+
+Noisychain=readdlm("../Exoplanet_ttv_data/values_NoisyKep307MAMALA.txt",',')
+Noisyptrue=readdlm("Noisyptrue.txt",',')
+Noisyptrue=vec(Noisyptrue)
+cornerNoisy=corner.corner(Noisychain[indices,:]',
+    labels=TTVlabels[indices],
+    quantiles=[0.16, 0.5, 0.84],
+    truths=Noisyptrue[indices],
+    use_math_text=true,
+    top_ticks=false,
+    show_titles=false,
+    title_fmt=".6f")
+
+
+k49chain=readdlm("../Exoplanet_ttv_data/values_KOI248MAMALA.txt",',')
+k49ptrue=readdlm("KOI248ptrue.txt",',')
+k49ptrue=vec(k49ptrue)
+cornerk49=corner.corner(k49chain[indices,:]',
+    labels=TTVlabels[indices],
+    quantiles=[0.16, 0.5, 0.84],
+    truths=k49ptrue[indices],
+    use_math_text=true,
+    top_ticks=false,
+    show_titles=false,
+    title_fmt=".6f")
+
+k57chain=readdlm("../Exoplanet_ttv_data/values_KOI1270DEMCMC.txt",',')
+k57ptrue=readdlm("KOI1270ptrue.txt",',')
+k57ptrue=vec(k57ptrue)
+
+ngen=size(k57chain)[2]
+smallk57chain=k57chain[:,1:10:ngen]
+
+cornerk57=corner.corner(smallk57chain[indices,:]',
+    labels=TTVlabels[indices],
+    quantiles=[0.16, 0.5, 0.84],
+    truths=k57ptrue[indices],
+    use_math_text=true,
+    top_ticks=false,
+    show_titles=false,
+    title_fmt=".6f")
