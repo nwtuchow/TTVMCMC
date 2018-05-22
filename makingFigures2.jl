@@ -248,12 +248,18 @@ cornerSSM=corner.corner(SSMchain',
     top_ticks=false,
     show_titles=false)
 
-TTVlabels=[L"\mathbf{\mu_b}",L"\mathbf{P_b}",L"\mathbf{t_{i,b}}",L"\mathbf{k_b}",L"\mathbf{h_b}",L"\mathbf{\mu_c}",L"\mathbf{P_c}",L"\mathbf{t_{i,c}}",L"\mathbf{k_c}",L"\mathbf{h_c}"]
+TTVlabels=[L"\mathbf{\mu_b (M_{\oplus}/M_{\odot})}",L"\mathbf{P_b}",L"\mathbf{t_{i,b}}",L"\mathbf{k_b}",L"\mathbf{h_b}",L"\mathbf{\mu_c (M_{\oplus}/M_{\odot})}",L"\mathbf{P_c}",L"\mathbf{t_{i,c}}",L"\mathbf{k_c}",L"\mathbf{h_c}"]
 indices=[1,4,5,6,9,10]
 
 k307chain=readdlm("../Exoplanet_ttv_data/values_transformedTTVFasterHMC.txt",',')
 k307ptrue=readdlm("TTVFasterptrue.txt",',')
 k307ptrue=vec(k307ptrue)
+
+#convert to M_⊕/M_⊙
+k307chain[1,:]=k307chain[1,:]/3.003e-6
+k307chain[6,:]=k307chain[6,:]/3.003e-6
+k307ptrue[1]=k307ptrue[1]/3.003e-6
+k307ptrue[6]=k307ptrue[6]/3.003e-6
 cornerk307=corner.corner(k307chain[indices,:]',
     labels=TTVlabels[indices],
     quantiles=[0.16, 0.5, 0.84],
@@ -266,6 +272,11 @@ cornerk307=corner.corner(k307chain[indices,:]',
 Noisychain=readdlm("../Exoplanet_ttv_data/values_NoisyKep307MAMALA.txt",',')
 Noisyptrue=readdlm("Noisyptrue.txt",',')
 Noisyptrue=vec(Noisyptrue)
+#convert to M_⊕/M_⊙
+Noisychain[1,:]=Noisychain[1,:]/3.003e-6
+Noisychain[6,:]=Noisychain[6,:]/3.003e-6
+Noisyptrue[1]=Noisyptrue[1]/3.003e-6
+Noisyptrue[6]=Noisyptrue[6]/3.003e-6
 cornerNoisy=corner.corner(Noisychain[indices,:]',
     labels=TTVlabels[indices],
     quantiles=[0.16, 0.5, 0.84],
@@ -279,6 +290,12 @@ cornerNoisy=corner.corner(Noisychain[indices,:]',
 k49chain=readdlm("../Exoplanet_ttv_data/values_KOI248MAMALA.txt",',')
 k49ptrue=readdlm("KOI248ptrue.txt",',')
 k49ptrue=vec(k49ptrue)
+
+#convert to M_⊕/M_⊙
+k49chain[1,:]=k49chain[1,:]/3.003e-6
+k49chain[6,:]=k49chain[6,:]/3.003e-6
+k49ptrue[1]=k49ptrue[1]/3.003e-6
+k49ptrue[6]=k49ptrue[6]/3.003e-6
 cornerk49=corner.corner(k49chain[indices,:]',
     labels=TTVlabels[indices],
     quantiles=[0.16, 0.5, 0.84],
@@ -291,6 +308,11 @@ cornerk49=corner.corner(k49chain[indices,:]',
 k57chain=readdlm("../Exoplanet_ttv_data/values_KOI1270DEMCMC.txt",',')
 k57ptrue=readdlm("KOI1270ptrue.txt",',')
 k57ptrue=vec(k57ptrue)
+#convert to M_⊕/M_⊙
+k57chain[1,:]=k57chain[1,:]/3.003e-6
+k57chain[6,:]=k57chain[6,:]/3.003e-6
+k57ptrue[1]=k57ptrue[1]/3.003e-6
+k57ptrue[6]=k57ptrue[6]/3.003e-6
 
 ngen=size(k57chain)[2]
 smallk57chain=k57chain[:,1:10:ngen]
@@ -333,3 +355,78 @@ tune_arr=tuneSampler(fmala,plogtarget,pgradlogtarget,ptensorlogtarget,
     numtune=20,start=start,stop=stop,GAMCtuner=false,narrow=1)
 
 tuneplots=plotTune(tune_arr)
+
+######################################################################
+using Klara
+#using MAMALASampler
+using GAMCSampler
+
+covTTV=readdlm("pilotCov3.txt",',')
+pmeans=readdlm("pilotMeans3.txt",',')
+pmeans=vec(pmeans)
+
+pstart=readdlm("pilotLast3.txt",',')
+pstart=vec(pstart)
+
+
+covTTVhalf= ctranspose(chol(covTTV))
+B=covTTVhalf #sigma^(1/2)
+
+include("TTVmodel3.jl")
+include("MCMCdiagnostics.jl")
+
+include("tuneSampler.jl")
+
+fhmc1(x)=HMC(x,1)
+fhmc2(x)=HMC(x,2)
+fhmc3(x)=HMC(x,3)
+fhmc5(x)=HMC(x,5)
+fhmc7(x)=HMC(x,7)
+fmala(x)=MALA(x)
+fsmmala(x)=SMMALA(x, H -> simple_posdef(H, a=1500.))
+fgamc1(x)=GAMC(
+  update=(sstate, pstate, i, tot) -> rand_exp_decay_update!(sstate, pstate, i, 50000, 10.),
+  transform=H -> simple_posdef(H, a=1500.),
+  driftstep=x,
+  minorscale=0.01,
+  c=0.01
+)
+fgamc2(x)=GAMC(
+  update=(sstate, pstate, i, tot) -> rand_exp_decay_update!(sstate, pstate, i+25000, 50000, 10.),
+  transform=H -> simple_posdef(H, a=1500.),
+  driftstep=x,
+  minorscale=0.01,
+  c=0.01
+)
+fgamc3(x)=GAMC(
+  update=(sstate, pstate, i, tot) -> rand_exp_decay_update!(sstate, pstate, i+50000, 50000, 10.),
+  transform=H -> simple_posdef(H, a=1500.),
+  driftstep=x,
+  minorscale=0.01,
+  c=0.01
+)
+fgamc4(x)=GAMC(
+  update=(sstate, pstate, i, tot) -> rand_exp_decay_update!(sstate, pstate, i+1000000, 50000, 10.),
+  transform=H -> simple_posdef(H, a=1500.),
+  driftstep=x,
+  minorscale=0.01,
+  c=0.01
+)
+
+nsamp=11
+sampnames=["HMC1", "HMC2","HMC3","HMC5","HMC7","MALA","SMMALA","GAMC(i=0)","GAMC(i=25000)","GAMC(i=50000)","GAMC(i=1e6)"]
+sampfuncs=[fhmc1,fhmc2,fhmc3,fhmc5,fhmc7,fmala,fsmmala,fgamc1,fgamc2,fgamc3,fgamc4]
+useGAMC=[false,false,false,false,false,false,false,true,true,true,true]
+tune_arr=Vector(nsamp)
+minsteps=Vector(nsamp)
+
+start=-3.0
+stop=0.7
+
+for q in 1:nsamp
+    println("Sampler: ", sampnames[q])
+    tune_arr[q]=tuneSampler(sampfuncs[q],plogtarget,pgradlogtarget,ptensorlogtarget,
+        numtune=20,start=start,stop=stop,GAMCtuner=useGAMC[q],narrow=1)
+    minsteps[q]=tune_arr[q]["minstep"]
+    println("Minstep: ", minsteps[q])
+end
