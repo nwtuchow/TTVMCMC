@@ -1,7 +1,7 @@
 #making figures for updated ttv paper
 using Plots
 plotly()
-jmax0=5
+#jmax0=5
 pmeans=zeros(10)
 B=eye(10)
 include("sinusoidFunctions2.jl")
@@ -27,7 +27,7 @@ SSMplotb=scatter(SSMbData[:,2],1440*(SSMbData[:,2]-SSMtlinb),
         yerror=1440*SSMbData[:,3],
         markersize=3,
         markershape=:circle,
-        title="Planet b")
+        title="Inner Planet")
 
 plot!(SSMTTVb,1440*(SSMTTVb-SSMtlinb),
         linewidth=3,
@@ -39,13 +39,13 @@ SSMplotc=scatter(SSMcData[:,2],1440*(SSMcData[:,2]-SSMtlinc),
         yerror=1440*SSMcData[:,3],
         markersize=3,
         markershape=:circle,
-        title="Planet c")
+        title="Outer Planet")
 
 plot!(SSMTTVc,1440*(SSMTTVc-SSMtlinc),
         linewidth=3,
         linecolor=:red)
 
-SSMdoubleplot=plot(SSMplotb,SSMplotc, layout=(2,1),leg=false, guidefont=font(10, "Arial"))
+SSMdoubleplot=plot(SSMplotb,SSMplotc, layout=(2,1),leg=false, guidefont=font(14, "Arial"))
 #######################################
 #kepler 307 data plot
 k307ptrue=readdlm("TTVFasterptrue.txt",',')
@@ -69,7 +69,7 @@ k307plotb=scatter(k307bData[:,1],1440*k307bData[:,2],
         yerror=1440*k307bData[:,3],
         markersize=3,
         markershape=:circle,
-        title="Planet b")
+        title="Inner Planet")
 
 plot!(k307timeb,1440*(k307timeb-tlinb),
         linewidth=3,
@@ -81,13 +81,13 @@ k307plotc=scatter(k307cData[:,1],1440*k307cData[:,2],
         yerror=1440*k307cData[:,3],
         markersize=3,
         markershape=:circle,
-        title="Planet c")
+        title="Outer Planet")
 
 plot!(k307timec,1440*(k307timec-tlinc),
         linewidth=3,
         linecolor=:red)
 
-k307doubleplot=plot(k307plotb,k307plotc, layout=(2,1),leg=false, guidefont=font(10, "Arial"))
+k307doubleplot=plot(k307plotb,k307plotc, layout=(2,1),leg=false, guidefont=font(14, "Arial"))
 #####################################################
 #Noisy kepler 307 data plot
 Noisyptrue=readdlm("Noisyptrue.txt",',')
@@ -111,7 +111,7 @@ Noisyplotb=scatter(NoisybData[:,1],1440*NoisybData[:,2],
         yerror=1440*NoisybData[:,3],
         markersize=3,
         markershape=:circle,
-        title="Planet b")
+        title="Inner Planet")
 
 plot!(Noisytimeb,1440*(Noisytimeb-tlinb),
         linewidth=3,
@@ -123,13 +123,13 @@ Noisyplotc=scatter(NoisycData[:,1],1440*NoisycData[:,2],
         yerror=1440*NoisycData[:,3],
         markersize=3,
         markershape=:circle,
-        title="Planet c")
+        title="Outer Planet")
 
 plot!(Noisytimec,1440*(Noisytimec-tlinc),
         linewidth=3,
         linecolor=:red)
 
-Noisydoubleplot=plot(Noisyplotb,Noisyplotc, layout=(2,1),leg=false, guidefont=font(10, "Arial"))
+Noisydoubleplot=plot(Noisyplotb,Noisyplotc, layout=(2,1),leg=false, guidefont=font(14, "Arial"))
 #########################################################
 #kepler 49 model data plot
 k49ptrue=readdlm("KOI248ptrue.txt",',')
@@ -153,7 +153,7 @@ k49plotb=scatter(k49bData[:,1],1440*k49bData[:,2],
         yerror=1440*k49bData[:,3],
         markersize=3,
         markershape=:circle,
-        title="Planet b")
+        title="Inner Planet")
 
 plot!(k49timeb,1440*(k49timeb-tlinb),
         linewidth=3,
@@ -165,13 +165,13 @@ k49plotc=scatter(k49cData[:,1],1440*k49cData[:,2],
         yerror=1440*k49cData[:,3],
         markersize=3,
         markershape=:circle,
-        title="Planet c")
+        title="Outer Planet")
 
 plot!(k49timec,1440*(k49timec-tlinc),
         linewidth=3,
         linecolor=:red)
 
-k49doubleplot=plot(k49plotb,k49plotc, layout=(2,1),leg=false, guidefont=font(10, "Arial"))
+k49doubleplot=plot(k49plotb,k49plotc, layout=(2,1),leg=false, guidefont=font(14, "Arial"))
 ##################################################
 #kepler 57 data plot
 k57ptrue=readdlm("KOI1270ptrue.txt",',')
@@ -195,7 +195,7 @@ k57plotb=scatter(k57bData[:,1],1440*k57bData[:,2],
         yerror=1440*k57bData[:,3],
         markersize=3,
         markershape=:circle,
-        title="Planet b")
+        title="Inner Planet")
 
 plot!(k57timeb,1440*(k57timeb-tlinb),
         linewidth=3,
@@ -207,13 +207,13 @@ k57plotc=scatter(k57cData[:,1],1440*k57cData[:,2],
         yerror=1440*k57cData[:,3],
         markersize=3,
         markershape=:circle,
-        title="Planet c")
+        title="Outer Planet")
 
 plot!(k57timec,1440*(k57timec-tlinc),
         linewidth=3,
         linecolor=:red)
 
-k57doubleplot=plot(k57plotb,k57plotc, layout=(2,1),leg=false, guidefont=font(10, "Arial"))
+k57doubleplot=plot(k57plotb,k57plotc, layout=(2,1),leg=false, guidefont=font(14, "Arial"))
 
 function cornerUncertainty{T<:Number}(outval::Array{T,2}, quantiles=[0.16, 0.5, 0.84])
     numparam=size(outval)[1]
@@ -248,7 +248,8 @@ cornerSSM=corner.corner(SSMchain',
     top_ticks=false,
     show_titles=false)
 
-TTVlabels=[L"\mathbf{\mu_b (M_{\oplus}/M_{\odot})}",L"\mathbf{P_b}",L"\mathbf{t_{i,b}}",L"\mathbf{k_b}",L"\mathbf{h_b}",L"\mathbf{\mu_c (M_{\oplus}/M_{\odot})}",L"\mathbf{P_c}",L"\mathbf{t_{i,c}}",L"\mathbf{k_c}",L"\mathbf{h_c}"]
+TTVlabels=[L"$\mu_b$ $(M_{\oplus}/M_{\odot})$",L"$P_b$",L"$t_{i,b}$",L"$k_b$",L"$h_b$",L"$\mu_c$ $(M_{\oplus}/M_{\odot})$",L"$P_c$",L"$t_{i,c}$",L"$k_c$",L"$h_c$"]
+
 indices=[1,4,5,6,9,10]
 
 k307chain=readdlm("../Exoplanet_ttv_data/values_transformedTTVFasterHMC.txt",',')
@@ -262,6 +263,7 @@ k307ptrue[1]=k307ptrue[1]/3.003e-6
 k307ptrue[6]=k307ptrue[6]/3.003e-6
 cornerk307=corner.corner(k307chain[indices,:]',
     labels=TTVlabels[indices],
+    label_kwargs=Dict("fontsize"=>22.0),
     quantiles=[0.16, 0.5, 0.84],
     truths=k307ptrue[indices],
     use_math_text=true,
@@ -279,6 +281,7 @@ Noisyptrue[1]=Noisyptrue[1]/3.003e-6
 Noisyptrue[6]=Noisyptrue[6]/3.003e-6
 cornerNoisy=corner.corner(Noisychain[indices,:]',
     labels=TTVlabels[indices],
+    label_kwargs=Dict("fontsize"=>22.0),
     quantiles=[0.16, 0.5, 0.84],
     truths=Noisyptrue[indices],
     use_math_text=true,
@@ -298,6 +301,7 @@ k49ptrue[1]=k49ptrue[1]/3.003e-6
 k49ptrue[6]=k49ptrue[6]/3.003e-6
 cornerk49=corner.corner(k49chain[indices,:]',
     labels=TTVlabels[indices],
+    label_kwargs=Dict("fontsize"=>22.0),
     quantiles=[0.16, 0.5, 0.84],
     truths=k49ptrue[indices],
     use_math_text=true,
@@ -319,6 +323,7 @@ smallk57chain=k57chain[:,1:10:ngen]
 
 cornerk57=corner.corner(smallk57chain[indices,:]',
     labels=TTVlabels[indices],
+    label_kwargs=Dict("fontsize"=>22.0),
     quantiles=[0.16, 0.5, 0.84],
     truths=k57ptrue[indices],
     use_math_text=true,
@@ -354,12 +359,28 @@ stop=0.7
 tune_arr=tuneSampler(fmala,plogtarget,pgradlogtarget,ptensorlogtarget,
     numtune=20,start=start,stop=stop,GAMCtuner=false,narrow=1)
 
-tuneplots=plotTune(tune_arr)
+writedlm("MALA_accept.txt",tune_arr["accrate"],",")
+writedlm("MALA_drift.txt",tune_arr["driftsteps"],",")
+
+acceptplot= scatter(tune_arr["driftsteps"], tune_arr["accrate"],
+    xaxis=:log10,
+    xlabel="Step size",
+    xtickfont=font(11, "Arial"),
+    ylabel="Net acceptance rate",
+    ytickfont=font(11, "Arial"),
+    leg=false,
+    guidefont=font(14, "Arial"))
+#tuneplots=plotTune(tune_arr)
+
+
+
 
 ######################################################################
 using Klara
 #using MAMALASampler
 using GAMCSampler
+using Plots
+plotly()
 
 covTTV=readdlm("pilotCov3.txt",',')
 pmeans=readdlm("pilotMeans3.txt",',')
@@ -417,16 +438,75 @@ nsamp=11
 sampnames=["HMC1", "HMC2","HMC3","HMC5","HMC7","MALA","SMMALA","GAMC(i=0)","GAMC(i=25000)","GAMC(i=50000)","GAMC(i=1e6)"]
 sampfuncs=[fhmc1,fhmc2,fhmc3,fhmc5,fhmc7,fmala,fsmmala,fgamc1,fgamc2,fgamc3,fgamc4]
 useGAMC=[false,false,false,false,false,false,false,true,true,true,true]
-tune_arr=Vector(nsamp)
-minsteps=Vector(nsamp)
 
-start=-3.0
-stop=0.7
+selectsamp=[3,6,8,11]
 
-for q in 1:nsamp
-    println("Sampler: ", sampnames[q])
-    tune_arr[q]=tuneSampler(sampfuncs[q],plogtarget,pgradlogtarget,ptensorlogtarget,
-        numtune=20,start=start,stop=stop,GAMCtuner=useGAMC[q],narrow=1)
-    minsteps[q]=tune_arr[q]["minstep"]
-    println("Minstep: ", minsteps[q])
+minsteps=[0.918,0.822,0.717,0.736,1.03,0.974,0.464,0.880,0.880,0.880,0.880]
+
+p = BasicContMuvParameter(:p,
+  logtarget=plogtarget,
+  gradlogtarget=pgradlogtarget,
+  tensorlogtarget=ptensorlogtarget)
+
+model = likelihood_model(p, false)
+
+zstart=to_z(pstart)
+p0= Dict(:p=>zstart)
+
+nstep=10000
+mcrange= BasicMCRange(nsteps=nstep)
+
+outopts= Dict{Symbol, Any}(:monitor=>[:value], :diagnostics=>[:accept])
+outchains=Array{Float64}(length(selectsamp),10,nstep)
+
+thress=0.05*ones(200)
+r=collect(1:200)
+acfuncs=Array{Float64}(length(selectsamp),10,200)
+
+count=1
+for i in selectsamp
+    mcsampler=sampfuncs[i](minsteps[i])
+    if useGAMC[i]
+        MCtuner=GAMCTuner(
+          VanillaMCTuner(verbose=false),
+          VanillaMCTuner(verbose=false),
+          VanillaMCTuner(verbose=true)
+        )
+    else
+        MCtuner=VanillaMCTuner(verbose=true)
+    end
+    job=BasicMCJob(model,mcsampler,mcrange, p0, tuner=MCtuner, outopts=outopts)
+    run(job)
+    outval=output(job).value
+    acfuncs[count,:,:]=autocorr(r,outval)
+    outchains[count,:,:]=outval
+    count+=1
+end
+
+
+
+mu_b_acfuncs=abs.(acfuncs[:,1,:])
+lstyles=[:solid,:dash,:dot,:dashdot]
+lnames=["HMC(n=3)" "MALA" "GAMC(i=0)" "GAMC(i=1e6)"]
+
+acfuncPlot=plot(r,thress,
+    label="Threshold",
+    linestyle=:dash,
+    linecolor=:black,
+    linewidth=3.0,
+    xlabel="Lag",
+    ylabel="Autocorrelation Function",
+    guidefont=font(14, "Arial"))
+
+for j in 1:4
+    plot!(r,mu_b_acfuncs[j,:],
+        label=lnames[j],
+        linewidth=1.5,
+        linestyle=lstyles[j],
+        linecolor=:black)
+end
+
+acls=Array{Float64}(4)
+for k in 1:4
+    acls[k]=aclength(outchains[k,1,:],threshold=0.05,useabs=true)
 end

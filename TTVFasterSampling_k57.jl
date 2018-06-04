@@ -2,18 +2,18 @@ using Klara
 #using MAMALASampler
 using GAMCSampler
 
-covTTV=readdlm("pilotCov3.txt",',')
-pmeans=readdlm("pilotMeans3.txt",',')
+covTTV=readdlm("KOI1270Cov.txt",',')
+pmeans=readdlm("KOI1270Means.txt",',')
 pmeans=vec(pmeans)
 
-pstart=readdlm("pilotLast3.txt",',')
+pstart=readdlm("KOI1270Last.txt",',')
 pstart=vec(pstart)
 
 
 covTTVhalf= ctranspose(chol(covTTV))
 B=covTTVhalf #sigma^(1/2)
 
-include("TTVmodel3.jl")
+include("KOI1270model.jl")
 include("MCMCdiagnostics.jl")
 
 include("tuneSampler.jl")
@@ -55,32 +55,35 @@ fgamc4(x)=GAMC(
 )
 
 nsamp=11
-sampnames=["HMC1", "HMC2","HMC3","HMC5","HMC7","MALA","SMMALA","GAMC(i=0)","GAMC(i=25000)","GAMC(i=50000)","GAMC(i=1e6)"]
+sampnames=["HMC1", "HMC2","HMC3","HMC5","HMC7","MALA","SMMALA","GAMC(k=0)","GAMC(k=25000)","GAMC(k=50000)","GAMC(k=1e6)"]
 sampfuncs=[fhmc1,fhmc2,fhmc3,fhmc5,fhmc7,fmala,fsmmala,fgamc1,fgamc2,fgamc3,fgamc4]
 useGAMC=[false,false,false,false,false,false,false,true,true,true,true]
 tune_arr=Vector(4)
 minsteps=Vector(4)
 
-start=log10(0.05)
-stop=log10(4.0)
+start= -4
+stop= 0.7
+
 nselect=4
 selectsamp=[3,6,8,11]
 count=1
 for q in selectsamp
     println("Sampler: ", sampnames[q])
     tune_arr[count]=tuneSampler(sampfuncs[q],plogtarget,pgradlogtarget,ptensorlogtarget,
-        numtune=30,start=start,stop=stop,GAMCtuner=useGAMC[q],narrow=0)
+        numtune=15,start=start,stop=stop,GAMCtuner=useGAMC[q],narrow=1,acc_upper=0.95,acc_lower=0.05)
     minsteps[count]=tune_arr[count]["minstep"]
     println("Minstep: ", minsteps[count])
     count+=1
 end
 
 bigessarr=tune_arr[1]["ess_array"]
+driftsteps=tune_arr[1]["driftsteps"]
 for i in 2:nselect
     bigessarr=cat(3,bigessarr,tune_arr[i]["ess_array"])
+    driftsteps=cat(2,driftsteps,tune_arr[i]["driftsteps"])
 end
 
-for j in 1:30
+for j in 1:15
     for k in 1:10
         for l in 1:nselect
             if isnan(bigessarr[j,k,l])
@@ -89,14 +92,14 @@ for j in 1:30
         end
     end
 end
-driftsteps= logspace(start,stop,30)
 
-writedlm("ess_k307.txt",bigessarr,",")
-writedlm("driftsteps_k307.txt",driftsteps,",")
 
-bigessarr=readdlm("ess_k307.txt",',')
-bigessarr=reshape(bigessarr,(30,10,4))
-driftsteps=readdlm("driftsteps_k307.txt",',')
+writedlm("ess_k57.txt",bigessarr,",")
+writedlm("driftsteps_k57.txt",driftsteps,",")
+
+bigessarr=readdlm("ess_k57.txt",',')
+bigessarr=reshape(bigessarr,(15,10,4))
+driftsteps=readdlm("driftsteps_k57.txt",',')
 
 
 mubess=bigessarr[:,1,:]
@@ -121,29 +124,29 @@ font1=Dict("family"=>"arial",
 ax[:set_xlabel]("Driftstep",fontdict=font1)
 ax[:set_xlim]([driftsteps[1],driftsteps[end]])
 ax[:set_ylabel](L"$\mu_b$ ESS", fontdict=font1)
-p1=PyPlot.plot(driftsteps,mubess[:,1],
+p1=PyPlot.plot(driftsteps[:,1],mubess[:,1],
     linestyle="dashed",
     linewidth=2,
     marker="o",
     color="black",
     label="HMC(n=3)")
-p2=PyPlot.plot(driftsteps,mubess[:,2],
+p2=PyPlot.plot(driftsteps[:,2],mubess[:,2],
     linestyle="-.",
     linewidth=2,
     marker="+",
     color="red",
     label="MALA")
-p3=PyPlot.plot(driftsteps,mubess[:,3],
+p3=PyPlot.plot(driftsteps[:,3],mubess[:,3],
     linestyle="solid",
     linewidth=2,
     marker="x",
     color="blue",
-    label="GAMC(i=0)")
-p3=PyPlot.plot(driftsteps,mubess[:,4],
+    label="GAMC(k=0)")
+p3=PyPlot.plot(driftsteps[:,4],mubess[:,4],
     linestyle="dotted",
     linewidth=2,
     marker="s",
     color="green",
-    label="GAMC(i=1e6)")
+    label="GAMC(k=1e6)")
 
 legend(loc="upper left")

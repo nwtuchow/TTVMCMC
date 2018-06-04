@@ -6,7 +6,7 @@
 #defined in TTVmodel3.jl
 #narrow tells tuner to narrow the range of tuning parameter steps to those corresponding to between 10-90% acceptance
 function tuneSampler(samplerfunc,plogtarget,pgradlogtarget,ptensorlogtarget;
-     start=-1.0, stop=0.7, numtune=10,nstep=5000, GAMCtuner=false, narrow=1, verbose=true)
+     start=-1.0, stop=0.7, numtune=10,nstep=5000, GAMCtuner=false, narrow=1, verbose=true,acc_upper=0.9,acc_lower=0.1)
     p= BasicContMuvParameter(:p,
       logtarget=plogtarget,
       gradlogtarget=pgradlogtarget,
@@ -50,7 +50,7 @@ function tuneSampler(samplerfunc,plogtarget,pgradlogtarget,ptensorlogtarget;
             run(job)
             acc=output(job).diagnosticvalues
             accrate[k]=mean(acc)
-            if accrate[k]<0.9 && acprev>0.9 && (!startcalled)
+            if accrate[k]<acc_upper && acprev>acc_upper && (!startcalled)
                 if accrate[k]>0.5
                     start=log10(driftsteps[k])
                     startcalled=true
@@ -62,7 +62,7 @@ function tuneSampler(samplerfunc,plogtarget,pgradlogtarget,ptensorlogtarget;
                 if verbose
                     println("Acceptance: ", 100*accrate[k], ", start=", start)
                 end
-            elseif accrate[k]<0.1 && acprev>0.1
+            elseif accrate[k]<acc_lower && acprev>acc_lower
                 #=if start!=log10(driftsteps[k])
                     stop=log10(driftsteps[k])
                 elseif k+1<=numtune
