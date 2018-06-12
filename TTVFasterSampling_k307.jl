@@ -117,7 +117,7 @@ ax[:set_xscale]("log")
 font1=Dict("family"=>"arial",
     "color"=>"black",
     "weight"=>"normal",
-    "size"=>16)
+    "size"=>18)
 ax[:set_xlabel]("Driftstep",fontdict=font1)
 ax[:set_xlim]([driftsteps[1],driftsteps[end]])
 ax[:set_ylabel](L"$\mu_b$ ESS", fontdict=font1)
@@ -147,3 +147,34 @@ p3=PyPlot.plot(driftsteps,mubess[:,4],
     label="GAMC(i=1e6)")
 
 legend(loc="upper left")
+
+#alternate plot
+using Plots
+plotly()
+lstyles=[:solid,:dash,:dot,:dashdot]
+lcolor=[:black,:red,:blue,:green]
+lnum= [1,4,6,9]
+lnames=["μ_b" "k_b" "μ_c" "k_b"]
+
+mala_ess=bigessarr[:,:,2]
+
+essPlot= plot(driftsteps, mala_ess[:,lnum[1]],
+    label=lnames[1],
+    linestyle=lstyles[1],
+    linecolor=lcolor[1],
+    linewidth=1.5,
+    xlabel="Driftstep",
+    xaxis=:log10,
+    xtickfont=font(11, "Arial"),
+    ylabel="ESS",
+    ytickfont=font(11, "Arial"),
+    guidefont=font(14, "Arial"),
+    legendfont=font(12,"Arial"))
+
+for j in 2:4
+    plot!(driftsteps, mala_ess[:,lnum[j]],
+        label=lnames[j],
+        linewidth=1.5,
+        linestyle=lstyles[j],
+        linecolor=lcolor[j])
+end

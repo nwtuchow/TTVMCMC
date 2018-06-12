@@ -486,24 +486,29 @@ end
 
 
 mu_b_acfuncs=abs.(acfuncs[:,1,:])
+writedlm("mu_b_acfuncs.txt",mu_b_acfuncs,",")
 lstyles=[:solid,:dash,:dot,:dashdot]
-lnames=["HMC(n=3)" "MALA" "GAMC(i=0)" "GAMC(i=1e6)"]
+lcolor=[:black,:red,:blue,:green]
+lnames=["HMC(n=3)" "MALA" "GAMC(k=0)" "GAMC(k=1e6)"]
 
-acfuncPlot=plot(r,thress,
+acfuncPlot=plot(r[1:100],thress[1:100],
     label="Threshold",
     linestyle=:dash,
     linecolor=:black,
     linewidth=3.0,
     xlabel="Lag",
+    xtickfont=font(11, "Arial"),
     ylabel="Autocorrelation Function",
-    guidefont=font(14, "Arial"))
+    ytickfont=font(11, "Arial"),
+    guidefont=font(14, "Arial"),
+    legendfont=font(12,"Arial"))
 
 for j in 1:4
-    plot!(r,mu_b_acfuncs[j,:],
+    plot!(r[1:100],mu_b_acfuncs[j,1:100],
         label=lnames[j],
         linewidth=1.5,
         linestyle=lstyles[j],
-        linecolor=:black)
+        linecolor=lcolor[j])
 end
 
 acls=Array{Float64}(4)
