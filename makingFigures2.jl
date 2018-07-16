@@ -248,7 +248,7 @@ cornerSSM=corner.corner(SSMchain',
     top_ticks=false,
     show_titles=false)
 
-TTVlabels=[L"$\mu_b$ $(M_{\oplus}/M_{\odot})$",L"$P_b$",L"$t_{i,b}$",L"$k_b$",L"$h_b$",L"$\mu_c$ $(M_{\oplus}/M_{\odot})$",L"$P_c$",L"$t_{i,c}$",L"$k_c$",L"$h_c$"]
+TTVlabels=[L"$\mu_1$ $(M_{\oplus}/M_{\odot})$",L"$P_1$",L"$t_{i,1}$",L"$k_1$",L"$h_1$",L"$\mu_2$ $(M_{\oplus}/M_{\odot})$",L"$P_2$",L"$t_{i,2}$",L"$k_2$",L"$h_2$"]
 
 indices=[1,4,5,6,9,10]
 

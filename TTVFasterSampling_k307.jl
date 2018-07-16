@@ -1,22 +1,22 @@
 using Klara
-#using MAMALASampler
+
 using GAMCSampler
 
-covTTV=readdlm("pilotCov3.txt",',')
-pmeans=readdlm("pilotMeans3.txt",',')
+covTTV=readdlm("../outputs/pilotCov3.txt",',')
+pmeans=readdlm("../outputs/pilotMeans3.txt",',')
 pmeans=vec(pmeans)
 
-pstart=readdlm("pilotLast3.txt",',')
+pstart=readdlm("../outputs/pilotLast3.txt",',')
 pstart=vec(pstart)
 
 
 covTTVhalf= ctranspose(chol(covTTV))
 B=covTTVhalf #sigma^(1/2)
 
-include("TTVmodel3.jl")
-include("MCMCdiagnostics.jl")
+include("../models/k307model.jl")
+include("../utils/MCMCdiagnostics.jl")
 
-include("tuneSampler.jl")
+include("../utils/tuneSampler.jl")
 
 fhmc1(x)=HMC(x,1)
 fhmc2(x)=HMC(x,2)
