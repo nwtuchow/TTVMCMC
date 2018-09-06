@@ -12,7 +12,7 @@ pstart=vec(pstart)
 covTTVhalf= ctranspose(chol(covTTV))
 B=covTTVhalf #sigma^(1/2)
 
-include("../models/k307model.jl.jl")
+include("../models/k307model.jl")
 include("../utils/MCMCdiagnostics.jl")
 
 p= BasicContMuvParameter(:p,

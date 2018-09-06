@@ -23,26 +23,6 @@ function to_p{T<:Number}(z::Vector{T})
     return p
 end
 
-function to_theta{T<:Number}(p::Vector{T})
-    theta=copy(p)
-    deleteat!(theta, [2,3,7,8]) #use params except for lin ephemerus P and t0
-    return theta
-end
-
-function from_theta{T<:Number}(theta::Vector{T})
-    p=zeros(T,10)
-    p[1]=theta[1]
-    p[2]=P_b
-    p[3]=ti_b
-    p[4]=theta[2]
-    p[5]=theta[3]
-    p[6]=theta[4]
-    p[7]=P_c
-    p[8]=ti_c
-    p[9]=theta[5]
-    p[10]=theta[6]
-    return p
-end
 
 function chisquared{T1<:Number,T2<:Number}(obs::Vector{T1},calc::Vector{T2},err::Vector{T1})
     @assert(length(obs)==length(calc))
@@ -152,10 +132,6 @@ function fptimeb{T1<:Number}(z::Vector{T1}, tnumb::Vector{Int64},alpha0::Number,
     return ftimeb(param,tnumb,alpha0,b0,jmax=jmax)
 end
 
-function fthtimeb{T1<:Number}(theta::Vector{T1}, tnumb::Vector{Int64},alpha0::Number,b0::Array; jmax=jmax0)
-    param=from_theta(theta)
-    return ftimeb(param,tnumb,alpha0,b0,jmax=jmax)
-end
 #planet c transit times
 function ftimec{T1<:Number}(p::Vector{T1}, tnumc::Vector{Int64},alpha0::Number,b0::Array; jmax=jmax0)
     tlinc= p[8]+ p[7]*(tnumc-1)
@@ -177,10 +153,6 @@ function fptimec{T1<:Number}(z::Vector{T1}, tnumc::Vector{Int64},alpha0::Number,
     return ftimec(param,tnumc,alpha0,b0,jmax=jmax)
 end
 
-function fthtimec{T1<:Number}(theta::Vector{T1}, tnumc::Vector{Int64},alpha0::Number,b0::Array; jmax=jmax0)
-    param=from_theta(theta)
-    return ftimec(param,tnumc,alpha0,b0,jmax=jmax)
-end
 #Gives combined chi squared value for both planets
 #bData and cData are arrays with
 #    row 1: times
@@ -242,30 +214,6 @@ function fittransitz{T<:Number,T2<:Number}(bdata::Array{T,2},cdata::Array{T,2},z
   return chisqb + chisqc
 end
 
-function fittransit_th{T<:Number,T2<:Number}(bdata::Array{T,2},cdata::Array{T,2},theta::Vector{T2};jmax=jmax0)
-
-  tb=bdata[:,1] #from rowe et al 2014, measured transit time not linear ephemerus
-  tc=cdata[:,1]
-  dtb=bdata[:,2]
-  dtc=cdata[:,2]
-  eb=bdata[:,3]
-  ec=cdata[:,3]
-  p=from_theta(theta)
-  tnumb=round.(Int64, (tb-p[3])/p[2] +1)
-  tnumc=round.(Int64, (tc-p[8])/p[7] +1)
-
-  alpha0 = abs(p[2]/p[7])^(2//3) #should these be calculated outside instead?
-  b0 = TTVFaster.LaplaceCoefficients.initialize(jmax+1,alpha0)
-  #note zram stands for z param
-  fthb(thet) = fthtimeb(thet,tnumb,alpha0,b0,jmax=jmax)
-  fthc(thet) = fthtimec(thet,tnumc,alpha0,b0,jmax=jmax)
-
-  tau_b=fthb(theta)
-  tau_c=fthc(theta)
-  chisqc=chisquared(tb,tau_b,eb)
-  chisqb=chisquared(tc,tau_c,ec)
-  return chisqb + chisqc
-end
 ######################################################################################
 #gradient function
 function gradtransit!{T<:Number,T2<:Number}(p::Vector{T},gstore::Vector{T},bdata::Array{T2,2},cdata::Array{T2,2},jconfig; jmax=jmax0)
@@ -346,44 +294,6 @@ function gradtransitz!{T<:Number,T2<:Number}(z::Vector{T},gstore::Vector{T},bdat
   end
 end
 
-function gradtransit_th!{T<:Number,T2<:Number}(theta::Vector{T},gstore::Vector{T},bdata::Array{T2,2},cdata::Array{T2,2},jconfig; jmax=jmax0)
-  tb=bdata[:,1]
-  tc=cdata[:,1]
-  dtb=bdata[:,2]
-  dtc=cdata[:,2]
-  eb=bdata[:,3]
-  ec=cdata[:,3]
-
-  p=from_theta(theta)
-  tnumb=round.(Int64, (tb-p[3])/p[2] +1)
-  tnumc=round.(Int64, (tc-p[8])/p[7] +1)
-
-  alpha0 = abs(p[2]/p[7])^(2//3)
-  b0 = TTVFaster.LaplaceCoefficients.initialize(jmax+1,alpha0)
-
-  fthb(thet) = fthtimeb(thet,tnumb,alpha0,b0,jmax=jmax)
-  fthc(thet) = fthtimec(thet,tnumc,alpha0,b0,jmax=jmax)
-
-  tau_b=fthb(theta)
-  tau_c=fthc(theta)
-
-  #ttv1 and 2 Array{Float64,1}
-  dTTVbdz=ForwardDiff.jacobian(fthb,theta,jconfig) #derivatives of transit time array with respect to params
-  dTTVcdz=ForwardDiff.jacobian(fthc,theta,jconfig)
-
-  for j in 1:length(theta)
-    dchsqb=0.0
-    dchsqc=0.0
-    for i in 1:length(tb)
-      dchsqb+= 2*(tau_b[i]-tb[i])*(dTTVbdz[i,j]) /eb[i]^2
-    end
-
-    for i2 in 1:length(tc)
-      dchsqc+= 2*(tau_c[i2]-tc[i2])*(dTTVcdz[i2,j]) /ec[i2]^2
-    end
-    gstore[j]=(dchsqb+dchsqc)
-  end
-end
 #########################################################################################
 #hessian of a vector valued function with respect to x
 function vhess{T<:Number}(fttv,x::Vector{T},tnum::Vector{Int64}, planet::Char,hcfg)
@@ -514,67 +424,6 @@ end
   # see http://www.juliadiff.org/ForwardDiff.jl/advanced_usage.html#hessian-of-a-vector-valued-function
   for k in 1:length(p)
     for j in 1:length(p)
-      d2chisqb=0.0
-      d2chisqc=0.0
-      for i in 1:length(tb)
-          d2chisqb+= 2*(dTTVbdz[i,j])*(dTTVbdz[i,k])/eb[i]^2 +2*(tau_b[i]-tb[i])*d2TTVb[j,k,i]/eb[i]^2
-      end
-
-      for i2 in 1:length(tc)
-          d2chisqc+= 2*(dTTVcdz[i2,j])*(dTTVcdz[i2,k])/ec[i2]^2 +2*(tau_c[i2]-tc[i2])*d2TTVc[j,k,i2]/ec[i2]^2
-      end
-
-      hstore[j,k]=d2chisqb+d2chisqc
-    end
-  end
-end
-
-function hesstransit_th!{T<:Number}(theta::Vector{T}, hstore::Array{T,2}, bdata::Array{T,2}, cdata::Array{T,2}, jconfig; jmax=jmax0, hcfg=ForwardDiff.HessianConfig{2}(theta))
-  tb=bdata[:,1]
-  tc=cdata[:,1]
-  dtb=bdata[:,2]
-  dtc=cdata[:,2]
-  eb=bdata[:,3]
-  ec=cdata[:,3]
-
-  p=from_theta(theta)
-  tnumb=round.(Int64, (tb-p[3])/p[2] +1)
-  tnumc=round.(Int64, (tc-p[8])/p[7] +1)
-
-  alpha0 = abs(p[2]/p[7])^(2//3) #should these be calculated outside instead?
-  b0 = TTVFaster.LaplaceCoefficients.initialize(jmax+1,alpha0)
-
-  fthb(thet) = fthtimeb(thet,tnumb,alpha0,b0,jmax=jmax)
-  fthc(thet) = fthtimec(thet,tnumc,alpha0,b0,jmax=jmax)
-
-
-function fthttv{Tp<:Number}(thet::Vector{Tp}, tnum::Vector{Int64},planet::Char)
-    if (planet=='b' || planet=='B' ||planet=='1')
-        return fthtimeb(thet,tnum,alpha0,b0,jmax=jmax)
-    elseif (planet=='c' || planet=='C' ||planet=='2')
-        return fthtimec(thet,tnum,alpha0,b0,jmax=jmax)
-    else
-        println("Planet is neither inner nor outer. \n")
-        return NaN
-    end
-end
-
-  tau_b=fthb(theta)
-  tau_c=fthc(theta)
-
-  dfthb(x)=ForwardDiff.jacobian(fthb,x,jconfig)
-  dfthc(x)=ForwardDiff.jacobian(fthc,x,jconfig)
-  dTTVbdz=dfthb(theta) #jacobians of TTV outputs
-  dTTVcdz=dfthc(theta)
-
-  #hessians of vector valued function
-  d2TTVb=vhess(fthttv,theta,tnumb,'b',hcfg)
-  d2TTVc=vhess(fthttv,theta,tnumc,'c',hcfg)
-
-  #d2chisq/dpi/dpj= ∑ (2*(dTTV[k]/dpi)*(dTTV/dpj)/σ^2 + 2*(TTV-obs)*(d2TTV[k]/dpi/dpj)/σ^2)
-  # see http://www.juliadiff.org/ForwardDiff.jl/advanced_usage.html#hessian-of-a-vector-valued-function
-  for k in 1:length(theta)
-    for j in 1:length(theta)
       d2chisqb=0.0
       d2chisqc=0.0
       for i in 1:length(tb)

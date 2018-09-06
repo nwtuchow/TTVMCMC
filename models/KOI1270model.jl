@@ -26,14 +26,9 @@ np=length(pinit)
 zinit=to_z(pinit)
 zguess=to_z(pguess)
 
-thinit=to_theta(pinit)
-thguess=to_theta(pguess)
-
 #jconfig=ForwardDiff.JacobianConfig(nothing,pinit)
 jconfigz=ForwardDiff.JacobianConfig(nothing,zinit)
-jconfigth=ForwardDiff.JacobianConfig(nothing,thinit)
 hcfgz=ForwardDiff.HessianConfig(nothing,zinit,ForwardDiff.Chunk{2}())
-hcfgth=ForwardDiff.HessianConfig(nothing,thinit,ForwardDiff.Chunk{2}())
 
 function ploglikelihood(z::Vector{Float64})
   param=to_p(z)
@@ -42,19 +37,6 @@ function ploglikelihood(z::Vector{Float64})
   end
 
   chisq=fittransitz(bData,cData,z)
-  if isnan(chisq)
-      return -Inf
-  end
-  return -chisq/2.0 #also need 2pi term, error term
-end
-
-function ploglikelihood_th(theta::Vector{Float64})
-  param=from_theta(theta)
-  if !isvalidTTV(param)
-    return -Inf
-  end
-
-  chisq=fittransit_th(bData,cData,theta)
   if isnan(chisq)
       return -Inf
   end
@@ -112,66 +94,9 @@ function plogprior(z::Vector{Float64})
   return logprior
 end
 
-function plogprior_th(theta::Vector{Float64})
-  #param=B*z+pmeans
-  param=from_theta(theta)
-  logprior=0.0
-
-  if !isvalidTTV(param)
-    return -Inf
-  end
-
-  tblogprior=0.0
-  #eta=1e-6 #changed to 1e-9
-  eta=1e-3
-  b=1/(pinit[2]+sqrt(pi*eta))
-  tblogprior+=log(b)
-  if (param[3]<= pinit[3] + pinit[2]/2.0) && (param[3]>= pinit[3] - pinit[2]/2.0)
-    tblogprior+=0.0
-  elseif (param[3]> pinit[3] + pinit[2]/2.0)
-    d2=param[3]-(pinit[3] + pinit[2]/2.0)
-    tblogprior+= -d2^2 /eta
-  elseif (param[3] < pinit[3] - pinit[2]/2.0)
-    d1= param[3]-(pinit[3] - pinit[2]/2.0)
-    tblogprior+= -d1^2/eta
-  end
-
-  tclogprior=0.0
-  b2=1/(pinit[7]+sqrt(pi*eta))
-  tclogprior+=log(b2)
-  if (param[8]<= pinit[8] + pinit[7]/2.0) && (param[8]>= pinit[8] - pinit[7]/2.0)
-    tclogprior+=0.0
-  elseif (param[8]> pinit[8] + pinit[7]/2.0)
-    d2=param[8]-(pinit[8] + pinit[7]/2.0)
-    tclogprior+= -d2^2 /eta
-  elseif (param[8] < pinit[8] - pinit[7]/2.0)
-    d1= param[8]-(pinit[8] - pinit[7]/2.0)
-    tclogprior+= -d1^2/eta
-  end
-
-  sigmae=0.1
-  #mean =[0.0,0.0]
-  ecov=(sigmae^2)*eye(2)
-  evec_b= [param[4],param[5]]
-  evecbprior= -0.5*(logdet(ecov) +2.0*log(2*pi) + evec_b' * inv(ecov) *evec_b)
-
-  evec_c= [param[9],param[10]]
-  eveccprior= -0.5*(logdet(ecov) +2.0*log(2*pi) + evec_c' * inv(ecov) *evec_c) #1 element array, need convert to scalar
-
-
-  logprior=logprior+tblogprior+tclogprior +evecbprior[1]+eveccprior[1]
-  return logprior
-end
-
-
 function plogtarget(z::Vector{Float64})
     tot=plogprior(z) + ploglikelihood(z)
     #tot=ploglikelihood(z)
-    return tot
-end
-
-function plogtarget_th(theta::Vector{Float64})
-    tot=plogprior_th(theta) + ploglikelihood_th(theta)
     return tot
 end
 
@@ -186,22 +111,6 @@ function pgradloglikelihood(z::Vector{Float64})
     for i in gradloglikelihood
       if isnan(i)
         return zeros(Float64,10)
-      end
-    end
-    return gradloglikelihood
-end
-
-function pgradloglikelihood_th(theta::Vector{Float64})
-    param=from_theta(theta)
-    gstore=Vector{eltype(theta)}(length(theta)) #store gradient
-    if !isvalidTTV(param)
-        return zeros(Float64,length(theta)) #might get stuck here
-    end
-    gradtransit_th!(theta,gstore,bData,cData,jconfigth)
-    gradloglikelihood= -0.5*gstore
-    for i in gradloglikelihood
-      if isnan(i)
-        return zeros(Float64,length(theta))
       end
     end
     return gradloglikelihood
@@ -258,47 +167,11 @@ function pgradlogprior(z::Vector{Float64})
      return gradlogprior
  end
 
-function pgradlogprior_th(theta::Vector{Float64})
-      param=from_theta(theta)
-      gradlogprior=zeros(length(theta))
-      if !isvalidTTV(param)
-          return zeros(Float64,length(theta)) #might get stuck here
-      end
-
-      #e_b vector gradlogprior
-      sigmae=0.1
-      ecov=(sigmae^2)*eye(2)
-      evec_b= [param[4],param[5]]
-      gradevecb= -inv(ecov) *evec_b
-
-      gradlogprior[2]+=gradevecb[1]
-      gradlogprior[3]+=gradevecb[2]
-
-      #e_c
-      evec_c= [param[9],param[10]]
-      gradevecc= -inv(ecov) *evec_c
-      gradlogprior[5]+=gradevecc[1]
-      gradlogprior[6]+=gradevecc[2]
-
-      #gradlogprior= gradlogprior'*B #change to gradient wrt z
-      #gradlogprior=gradlogprior[1,:]
-
-      return gradlogprior
-  end
-
-
 function pgradlogtarget(z::Vector{Float64})
     gprior=pgradlogprior(z)
     glikelihood=pgradloglikelihood(z)
     tot=gprior+glikelihood
     #tot=glikelihood
-    return tot
-end
-
-function pgradlogtarget_th(theta::Vector{Float64})
-    gprior=pgradlogprior_th(theta)
-    glikelihood=pgradloglikelihood_th(theta)
-    tot=gprior+glikelihood
     return tot
 end
 
@@ -348,33 +221,6 @@ function ptensorlogprior(z::Vector{Float64})
     return tensorlogprior
 end
 
-function ptensorlogprior_th(theta::Vector{Float64})
-    param=from_theta(theta)
-    l=length(theta)
-    if !isvalidTTV(param)
-        return eye(Float64,l)
-    end
-    tensorlogprior=zeros(eltype(theta),l,l)
-
-    #e_b vector tensorlogprior
-    sigmae=0.1
-    ecov=(sigmae^2)*eye(2)
-    tensorevec=-inv(ecov)
-    tensorlogprior[2,2]+=tensorevec[1,1]
-    tensorlogprior[3,3]+=tensorevec[2,2]
-    tensorlogprior[2,3]+=tensorevec[1,2]
-    tensorlogprior[3,2]+=tensorevec[2,1]
-
-    #e_c
-    tensorlogprior[5,5]+=tensorevec[1,1]
-    tensorlogprior[6,6]+=tensorevec[2,2]
-    tensorlogprior[5,6]+=tensorevec[1,2]
-    tensorlogprior[6,5]+=tensorevec[2,1]
-
-    #tensorlogprior=(B'*tensorlogprior)*B #derivative wrt z
-    return tensorlogprior
-end
-
 function ptensorloglikelihood(z::Vector{Float64})
     param=to_p(z)
     l=length(z)
@@ -392,23 +238,6 @@ function ptensorloglikelihood(z::Vector{Float64})
     return tensorloglikelihood
 end
 
-function ptensorloglikelihood_th(theta::Vector{Float64})
-    param=from_theta(theta)
-    l=length(theta)
-    if !isvalidTTV(param)
-        return eye(Float64,l)
-    end
-
-    hstore=Array{eltype(theta)}(l,l) #store hessian
-    hesstransit_th!(theta,hstore,bData,cData,jconfigth, hcfg=hcfgth)
-    if any(isnan.(hstore))
-        return eye(Float64,l)
-    end
-    tensorloglikelihood=-0.5*hstore
-
-    return tensorloglikelihood
-end
-
 
 function ptensorlogtarget(z::Vector{Float64})
     tprior=ptensorlogprior(z)
@@ -418,13 +247,6 @@ function ptensorlogtarget(z::Vector{Float64})
     return 0.5*(tot+tot')
 end
 
-function ptensorlogtarget_th(theta::Vector{Float64})
-    tprior=ptensorlogprior_th(theta)
-    tlikelihood=ptensorloglikelihood_th(theta)
-    tot= tprior+tlikelihood
-    #tot=tprior
-    return 0.5*(tot+tot')
-end
 
 #pdata[param,iteration]
 function samplecov(pdata::Array{Float64,2})
