@@ -22,9 +22,7 @@ P_TTV=1/(5/P_c-4/P_b)
 
 pguess=[ptrue[1],P_b,0.003,0.005, 0.00003,0.0001, ptrue[7],P_c,-0.008,-0.01,-0.0001,0.0001] #starting values
 
-#zinit=B \ (pinit-pmeans)
 zinit=to_z(pinit)
-#zguess=B \ (pguess-pmeans)
 zguess=to_z(pguess)
 
 function isvalidSSM{T<:Number}(p::Vector{T})
@@ -45,13 +43,13 @@ function plogtarget{T<:Number}(z::Vector{T})
     tb=trueDatab[:,2] #linear ephemeruses
     eb=trueDatab[:,3]
 
-    yb= linsinharmonicb2(tnumb,param)
+    yb= linsinharmonicb(tnumb,param)
 
     tnumc=round.(Int64,trueDatac[:,1])
     tc=trueDatac[:,2]
     ec=trueDatac[:,3]
 
-    yc=linsinharmonicc2(tnumc,param)
+    yc=linsinharmonicc(tnumc,param)
 
     chisqb=0.0
     for j in 1:length(tb)

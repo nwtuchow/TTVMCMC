@@ -31,7 +31,7 @@ function f{T<:Number}(z::Vector{T})
   tnumb=round.(Int64,(tlinb-bData[1,1])/P_b +1)
   eb=bData[:,3]
 
-  yb=linsinharmonicb2(tnumb,param)
+  yb=linsinharmonicb(tnumb,param)
 
   tc=cData[:,1]
   dtc=cData[:,2]
@@ -40,7 +40,7 @@ function f{T<:Number}(z::Vector{T})
   tnumc=round.(Int64,(tlinc-cData[1,1])/P_c +1)
   ec=cData[:,3]
 
-  yc=linsinharmonicc2(tnumc,param)
+  yc=linsinharmonicc(tnumc,param)
 
   chisqb=0.0
   for j in 1:length(tb)
@@ -130,8 +130,8 @@ tlinc= tc-dtc
 tnumb=round(Int64,(tlinb-bData[1,1])/P_b +1)
 tnumc=round(Int64,(tlinc-cData[1,1])/P_c +1)
 
-yfb=linsinharmonicb2(tnumb,pf)
-yfc=linsinharmonicc2(tnumc,pf)
+yfb=linsinharmonicb(tnumb,pf)
+yfc=linsinharmonicc(tnumc,pf)
 
 using Plots
 plotly()
@@ -144,8 +144,8 @@ plot!(tlinc,yfc-tlinc,linewidth=3,linecolor=:red)
 
 doubleplot= plot(plot1,plot2,layout=(2,1))
 
-sinHarFitb=simDatab2(tnumb,pf, 5.0/1440.0)
-sinHarFitc=simDatac2(tnumc,pf, 5.0/1440.0)
+sinHarFitb=simDatab(tnumb,pf, 5.0/1440.0)
+sinHarFitc=simDatac(tnumc,pf, 5.0/1440.0)
 
 writedlm("../outputs/sinHarmonicFit_bData2.txt",sinHarFitb,",")
 writedlm("../outputs/sinHarmonicFit_cData2.txt",sinHarFitc,",")
