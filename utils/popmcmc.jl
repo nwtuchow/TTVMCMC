@@ -277,6 +277,7 @@ function run_indep_rwmh_mcmc( theta_init::Array{Float64,2}, calc_log_pdf::Functi
            "accepts_chain"=>accepts_chain, "rejects_chain"=>rejects_chain, "accepts_generation"=>accepts_generation, "rejects_generation"=>rejects_generation )
 end
 
+#=
 # Utilities to plot results
 #pyplot syntax
 function plot_trace(data::Dict, paramid::Integer; chains::Vector{Int} = [1,2,3,4,5], gen_start::Integer = 1, gen_stop::Integer = -1 )
@@ -351,3 +352,4 @@ function log_sum_of_log_quantities(logpdf1::Float64, logpdf2::Float64)
   end
   return logpdf
 end
+=#
