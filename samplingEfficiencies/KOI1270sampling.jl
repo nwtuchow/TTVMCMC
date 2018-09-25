@@ -119,7 +119,7 @@ measure1=Vector{Float64}(nsamp) #mean ess/time
 measure2=Vector{Float64}(nsamp) #min ess/time
 for j in 1:(nsamp)
   measure1[j]=mean(ess_array[j,:])/times[j]
-  measure2[j]=minimum(ess_array[j,:]/times[j])
+  measure2[j]=minimum(ess_array[j,:])/times[j]
 end
 
 diagnostic_array=hcat(sampnames,minsteps,times,measure1,measure2)
