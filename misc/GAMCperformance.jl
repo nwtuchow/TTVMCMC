@@ -25,15 +25,19 @@ fGAMC(k; x=minstep)= GAMC(
   c=0.01
 )
 
-ntests=20
-k_array= zeros(Int,ntests)
+ntests=30
+adder=5000
+k_array=adder*range(0,ntests)
+dur_array=adder*ones(Int,ntests)
+
+#=k_array= zeros(Int,ntests)
 dur_array=zeros(Int,ntests)
 dur_array[1]=1000
 adder=1000
 for i in 2:ntests
     k_array[i]= k_array[i-1] + (i-1)*adder
     dur_array[i] = i*adder
-end
+end=#
 
 #measure efficiency in interval from n to n+1 th k value
 #ie first effciency is labeled k=0 from k=0 - k=1000
@@ -73,5 +77,5 @@ for j in 1:ntests
     measure2[j]=minimum(ess_array[j,:])/times[j]
 end
 
-writedlm("../outputs/k_GAMC.txt", k_array,",")
-writedlm("../outputs/efficiency_GAMC.txt", measure2,",")
+writedlm("../outputs/k_GAMC2.txt", k_array,",")
+writedlm("../outputs/efficiency_GAMC2.txt", measure2,",")

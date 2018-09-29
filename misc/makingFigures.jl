@@ -388,7 +388,7 @@ using GAMCSampler
 using Plots
 plotly()
 
-covTTV=readdlm("../outputs/pilotCov3.txt",',')
+#=covTTV=readdlm("../outputs/pilotCov3.txt",',')
 pmeans=readdlm("../outputs/pilotMeans3.txt",',')
 pmeans=vec(pmeans)
 
@@ -493,7 +493,7 @@ end
 
 mu_b_acfuncs=abs.(acfuncs[:,1,:])
 writedlm("../outputs/mu_b_acfuncs.txt",mu_b_acfuncs,",")
-
+=#
 mu_b_acfuncs=readdlm("../outputs/mu_b_acfuncs.txt",',')
 lstyles=[:solid,:dash,:dot,:dashdot]
 lcolor=[:black,:red,:blue,:green]
@@ -523,3 +523,19 @@ acls=Array{Float64}(4)
 for k in 1:4
     acls[k]=aclength(outchains[k,1,:],threshold=0.05,useabs=true)
 end
+
+#################################################################
+#GAMC efficiency plot
+using Plots
+plotly()
+
+k_array= readdlm("../outputs/k_GAMC.txt",',')
+measure2= readdlm("../outputs/efficiency_GAMC.txt",',')
+
+GAMCplot = scatter(k_array, measure2,
+    xlabel= "k",
+    xtickfont=font(11, "Arial"),
+    ylabel="Efficiency",
+    ytickfont=font(11, "Arial"),
+    leg=false,
+    guidefont=font(14, "Arial"))
