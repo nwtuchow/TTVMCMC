@@ -72,3 +72,6 @@ for j in 1:ntests
     ess_array[j,:]=dur_array[j]./aclengths[j,:]
     measure2[j]=minimum(ess_array[j,:])/times[j]
 end
+
+writedlm("../outputs/k_GAMC.txt", k_array,",")
+writedlm("../outputs/efficiency_GAMC.txt", measure2,",")
