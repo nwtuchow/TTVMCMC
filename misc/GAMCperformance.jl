@@ -25,10 +25,14 @@ fGAMC(k; x=minstep)= GAMC(
   c=0.01
 )
 
-ntests=30
-adder=5000
-k_array=adder*range(0,ntests)
-dur_array=adder*ones(Int,ntests)
+ntests=25
+dur=10000
+k_array=dur*range(0,ntests)
+dur_array=dur*ones(Int,ntests)
+
+#adder=5000
+#k_array=adder*range(0,ntests)
+#dur_array=adder*ones(Int,ntests)
 
 #=k_array= zeros(Int,ntests)
 dur_array=zeros(Int,ntests)
@@ -65,6 +69,7 @@ ess_array=Array{Float64}(ntests, length(pinit))
 measure2= Vector(ntests)
 
 for j in 1:ntests
+    println("Starting at k = ", k_array[j])
     mcsampler=fGAMC(k_array[j])
     mcrange=BasicMCRange(nsteps=dur_array[j])
     job=BasicMCJob(model,mcsampler,mcrange, p0, tuner=MCtuner, outopts=outopts)
@@ -77,5 +82,16 @@ for j in 1:ntests
     measure2[j]=minimum(ess_array[j,:])/times[j]
 end
 
-writedlm("../outputs/k_GAMC2.txt", k_array,",")
-writedlm("../outputs/efficiency_GAMC2.txt", measure2,",")
+writedlm("../outputs/k_GAMC3.txt", k_array,",")
+writedlm("../outputs/efficiency_GAMC3.txt", measure2,",")
+
+using Plots
+plotly()
+
+GAMCplot = scatter(k_array, measure2,
+    xlabel= "k",
+    xtickfont=font(11, "Arial"),
+    ylabel="Efficiency",
+    ytickfont=font(11, "Arial"),
+    leg=false,
+    guidefont=font(14, "Arial"))
