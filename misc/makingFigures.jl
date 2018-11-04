@@ -215,24 +215,12 @@ plot!(k57timec,1440*(k57timec-tlinc),
 
 k57doubleplot=plot(k57plotb,k57plotc, layout=(2,1),leg=false, guidefont=font(14, "Arial"))
 
-function cornerUncertainty{T<:Number}(outval::Array{T,2}, quantiles=[0.16, 0.5, 0.84])
-    numparam=size(outval)[1]
-    outarr=Array{T}(numparam,3)
-    for q in 1:numparam
-        qls=quantile(outval[q,:],quantiles)
-        outarr[q,1]=qls[2]
-        outarr[q,2]=qls[3]-qls[2]
-        outarr[q,3]=qls[2]-qls[1]
-    end
-    #row 1: median 2:upper 3:lower
-    return outarr
-end
-
 ######################################################################################
-#corner.py works in julia 5, working on getting to work in julia 6
+#corner.py works in julia 6
 using PyPlot
 using PyCall
 using LaTeXStrings
+include("../utils/MCMCdiagnostics.jl")
 @pyimport corner
 
 SSMchain=readdlm("../../Exoplanet_ttv_data/values_correctedSSM_HMC.txt",',')
@@ -332,6 +320,26 @@ cornerk57=corner.corner(smallk57chain[indices,:]',
     show_titles=false,
     title_fmt=".6f")
 
+#GAMC kep 57 chain
+k57chain2=readdlm("../../Exoplanet_ttv_data/values_KOI1270GAMC.txt",',')
+k57ptrue2=readdlm("../outputs/KOI1270ptrue.txt",',')
+k57ptrue2=vec(k57ptrue2)
+
+#convert to M_⊕/M_⊙
+k57chain2[1,:]=k57chain2[1,:]/3.003e-6
+k57chain2[6,:]=k57chain2[6,:]/3.003e-6
+k57ptrue2[1]=k57ptrue2[1]/3.003e-6
+k57ptrue2[6]=k57ptrue2[6]/3.003e-6
+
+cornerk57_2=corner.corner(k57chain2[indices,:]',
+    labels=TTVlabels[indices],
+    label_kwargs=Dict("fontsize"=>22.0),
+    quantiles=[0.16, 0.5, 0.84],
+    truths=k57ptrue2[indices],
+    use_math_text=true,
+    top_ticks=false,
+    show_titles=false,
+    title_fmt=".6f")
 #####################################################
 using Klara
 using GAMCSampler

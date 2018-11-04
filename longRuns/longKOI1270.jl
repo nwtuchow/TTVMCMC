@@ -14,6 +14,7 @@ B=covTTVhalf #sigma^(1/2)
 include("../models/KOI1270model.jl")
 include("../utils/MCMCdiagnostics.jl")
 
+# pop_init in z space
 ndim= 10
 popsize= floor(Int64,3*ndim)
 pop_init=readdlm("../outputs/KOI1270ensembleLast.txt",',')

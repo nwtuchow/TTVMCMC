@@ -1,19 +1,18 @@
-#Testing MCMC in Klara
+#long chain for KOI 1270 model using GAMC
 using Klara
 using GAMCSampler
 
-covTTV=readdlm("../outputs/KOI248Cov.txt",',')
-pmeans=readdlm("../outputs/KOI248Means.txt",',')
+covTTV=readdlm("../outputs/KOI1270Cov.txt",',')
+pmeans=readdlm("../outputs/KOI1270Means.txt",',')
 pmeans=vec(pmeans)
 
-pstart=readdlm("../outputs/KOI248Last.txt",',')
+pstart=readdlm("../outputs/KOI1270Last.txt",',')
 pstart=vec(pstart)
-
 
 covTTVhalf= ctranspose(chol(covTTV))
 B=covTTVhalf #sigma^(1/2)
 
-include("../models/KOI248model.jl")
+include("../models/KOI1270model.jl")
 include("../utils/MCMCdiagnostics.jl")
 
 p= BasicContMuvParameter(:p,
@@ -23,28 +22,25 @@ p= BasicContMuvParameter(:p,
 
 model= likelihood_model(p, false)
 
-
 zstart=to_z(pstart)
 p0= Dict(:p=>zstart)
 
+ndim= 10
 numsteps=5000000
-#burnin=500000
+
 mcrange= BasicMCRange(nsteps=numsteps, thinning=10)
 
 outopts = Dict{Symbol, Any}(:monitor=>[:value],
   :diagnostics=>[:accept])
 
-#MCtuner=AcceptanceRateMCTuner(0.6,verbose=true)
-#MCtuner=VanillaMCTuner(verbose=true)
 MCtuner=GAMCTuner(
-  VanillaMCTuner(verbose=false),
-  VanillaMCTuner(verbose=false),
-  VanillaMCTuner(verbose=true)
+    VanillaMCTuner(verbose=false),
+    VanillaMCTuner(verbose=false),
+    VanillaMCTuner(verbose=true)
 )
 
-#minstep=0.000774263682681127
-minstep=0.349
-#mcsampler=MALA(minstep)
+minstep= 0.612
+
 mcsampler=GAMC(
   update=(sstate, pstate, i, tot) -> rand_exp_decay_update!(sstate, pstate, i, 50000, 10.),
   transform=H -> simple_posdef(H, a=1500.),
@@ -65,13 +61,7 @@ for j in 1:(size(outval)[2])
   outval[:,j]=B*outval[:,j]+pmeans
 end
 
-writedlm("../outputs/values_KOI248GAMC.txt", outval, ",")
-writedlm("../outputs/accept_KOI248GAMC.txt", outacc, ",")
+out_quantiles= cornerUncertainty(outval)
 
-using PyPlot
-using PyCall
-using LaTeXStrings
-@pyimport corner
-corner.corner(outval', labels=[L"\mathbf{\mu_b}",L"\mathbf{P_b}",L"\mathbf{t_{i,b}}",L"\mathbf{k_b}",L"\mathbf{h_b}",L"\mathbf{\mu_c}",L"\mathbf{P_c}",L"\mathbf{t_{i,c}}",L"\mathbf{k_c}",L"\mathbf{h_c}"],
-quantiles=[0.16, 0.5, 0.84],
-show_titles=true)
+writedlm("../../Exoplanet_ttv_data/values_KOI1270GAMC.txt", outval, ",")
+writedlm("../../Exoplanet_ttv_data/accept_KOI1270GAMC.txt", outacc, ",")
