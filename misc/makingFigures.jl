@@ -15,18 +15,21 @@ SSMcData=readdlm("../outputs/sinHarmonicFit_cData2.txt", ',')
 
 
 tnumb=round.(Int64,SSMbData[:,1])
-SSMTTVb= linsinharmonicb2(tnumb,SSMptrue)
+SSMTTVb= linsinharmonicb(tnumb,SSMptrue)
 SSMtlinb=SSMptrue[1]+(tnumb-1)*SSMptrue[2]
 
 tnumc=round.(Int64,SSMcData[:,1])
-SSMTTVc=linsinharmonicc2(tnumc,SSMptrue)
+SSMTTVc=linsinharmonicc(tnumc,SSMptrue)
 SSMtlinc= SSMptrue[7]+(tnumc-1)*SSMptrue[8]
 
+ticksize=12
 SSMplotb=scatter(SSMbData[:,2],1440*(SSMbData[:,2]-SSMtlinb),
         ylabel= "TTV (min)",
         yerror=1440*SSMbData[:,3],
         markersize=3,
         markershape=:circle,
+        xtickfontsize= ticksize,
+        ytickfontsize=ticksize,
         title="Inner Planet")
 
 plot!(SSMTTVb,1440*(SSMTTVb-SSMtlinb),
@@ -39,6 +42,8 @@ SSMplotc=scatter(SSMcData[:,2],1440*(SSMcData[:,2]-SSMtlinc),
         yerror=1440*SSMcData[:,3],
         markersize=3,
         markershape=:circle,
+        xtickfontsize= ticksize,
+        ytickfontsize=ticksize,
         title="Outer Planet")
 
 plot!(SSMTTVc,1440*(SSMTTVc-SSMtlinc),
@@ -64,11 +69,14 @@ b0 = TTVFaster.LaplaceCoefficients.initialize(jmax0+1,alpha0)
 k307timeb=ftimeb(k307ptrue,tnumb,alpha0,b0,jmax=jmax0)
 k307timec=ftimec(k307ptrue,tnumc,alpha0,b0,jmax=jmax0)
 
+ticksize=12
 k307plotb=scatter(k307bData[:,1],1440*k307bData[:,2],
         ylabel= "TTV (min)",
         yerror=1440*k307bData[:,3],
         markersize=3,
         markershape=:circle,
+        xtickfontsize= ticksize,
+        ytickfontsize=ticksize,
         title="Inner Planet")
 
 plot!(k307timeb,1440*(k307timeb-tlinb),
@@ -81,6 +89,8 @@ k307plotc=scatter(k307cData[:,1],1440*k307cData[:,2],
         yerror=1440*k307cData[:,3],
         markersize=3,
         markershape=:circle,
+        xtickfontsize= ticksize,
+        ytickfontsize=ticksize,
         title="Outer Planet")
 
 plot!(k307timec,1440*(k307timec-tlinc),
@@ -106,11 +116,14 @@ b0 = TTVFaster.LaplaceCoefficients.initialize(jmax0+1,alpha0)
 Noisytimeb=ftimeb(Noisyptrue,tnumb,alpha0,b0,jmax=jmax0)
 Noisytimec=ftimec(Noisyptrue,tnumc,alpha0,b0,jmax=jmax0)
 
+ticksize=12
 Noisyplotb=scatter(NoisybData[:,1],1440*NoisybData[:,2],
         ylabel= "TTV (min)",
         yerror=1440*NoisybData[:,3],
         markersize=3,
         markershape=:circle,
+        xtickfontsize= ticksize,
+        ytickfontsize=ticksize,
         title="Inner Planet")
 
 plot!(Noisytimeb,1440*(Noisytimeb-tlinb),
@@ -123,6 +136,8 @@ Noisyplotc=scatter(NoisycData[:,1],1440*NoisycData[:,2],
         yerror=1440*NoisycData[:,3],
         markersize=3,
         markershape=:circle,
+        xtickfontsize= ticksize,
+        ytickfontsize=ticksize,
         title="Outer Planet")
 
 plot!(Noisytimec,1440*(Noisytimec-tlinc),
@@ -148,11 +163,14 @@ b0 = TTVFaster.LaplaceCoefficients.initialize(jmax0+1,alpha0)
 k49timeb=ftimeb(k49ptrue,tnumb,alpha0,b0,jmax=jmax0)
 k49timec=ftimec(k49ptrue,tnumc,alpha0,b0,jmax=jmax0)
 
+ticksize=12
 k49plotb=scatter(k49bData[:,1],1440*k49bData[:,2],
         ylabel= "TTV (min)",
         yerror=1440*k49bData[:,3],
         markersize=3,
         markershape=:circle,
+        xtickfontsize= ticksize,
+        ytickfontsize=ticksize,
         title="Inner Planet")
 
 plot!(k49timeb,1440*(k49timeb-tlinb),
@@ -165,6 +183,8 @@ k49plotc=scatter(k49cData[:,1],1440*k49cData[:,2],
         yerror=1440*k49cData[:,3],
         markersize=3,
         markershape=:circle,
+        xtickfontsize= ticksize,
+        ytickfontsize=ticksize,
         title="Outer Planet")
 
 plot!(k49timec,1440*(k49timec-tlinc),
@@ -190,11 +210,14 @@ b0 = TTVFaster.LaplaceCoefficients.initialize(jmax0+1,alpha0)
 k57timeb=ftimeb(k57ptrue,tnumb,alpha0,b0,jmax=jmax0)
 k57timec=ftimec(k57ptrue,tnumc,alpha0,b0,jmax=jmax0)
 
+ticksize=12
 k57plotb=scatter(k57bData[:,1],1440*k57bData[:,2],
         ylabel= "TTV (min)",
         yerror=1440*k57bData[:,3],
         markersize=3,
         markershape=:circle,
+        xtickfontsize= ticksize,
+        ytickfontsize=ticksize,
         title="Inner Planet")
 
 plot!(k57timeb,1440*(k57timeb-tlinb),
@@ -207,6 +230,8 @@ k57plotc=scatter(k57cData[:,1],1440*k57cData[:,2],
         yerror=1440*k57cData[:,3],
         markersize=3,
         markershape=:circle,
+        xtickfontsize= ticksize,
+        ytickfontsize=ticksize,
         title="Outer Planet")
 
 plot!(k57timec,1440*(k57timec-tlinc),
@@ -380,11 +405,11 @@ stepsizes=readdlm("../outputs/MALA_drift.txt",',')
 acceptplot= scatter(stepsizes, accrates,
     xaxis=:log10,
     xlabel="Step size",
-    xtickfont=font(11, "Arial"),
     ylabel="Net acceptance rate",
-    ytickfont=font(11, "Arial"),
+    xtickfontsize= 14,
+    ytickfontsize=14,
     leg=false,
-    guidefont=font(14, "Arial"))
+    guidefont=font(16, "Arial"))
 #tuneplots=plotTune(tune_arr)
 
 
@@ -502,6 +527,8 @@ end
 mu_b_acfuncs=abs.(acfuncs[:,1,:])
 writedlm("../outputs/mu_b_acfuncs.txt",mu_b_acfuncs,",")
 =#
+thress=0.05*ones(200)
+r=collect(1:200)
 mu_b_acfuncs=readdlm("../outputs/mu_b_acfuncs.txt",',')
 lstyles=[:solid,:dash,:dot,:dashdot]
 lcolor=[:black,:red,:blue,:green]
@@ -513,16 +540,17 @@ acfuncPlot=plot(r[1:100],thress[1:100],
     linecolor=:black,
     linewidth=3.0,
     xlabel="Lag",
-    xtickfont=font(11, "Arial"),
+    xtickfont=font(14, "Arial"),
     ylabel="Autocorrelation Function",
-    ytickfont=font(11, "Arial"),
-    guidefont=font(14, "Arial"),
-    legendfont=font(12,"Arial"))
+    ytickfont=font(14, "Arial"),
+    guidefont=font(16, "Arial"),
+    legend= :topright ,
+    legendfont=font(14,"Arial"))
 
 for j in 1:4
     plot!(r[1:100],mu_b_acfuncs[j,1:100],
         label=lnames[j],
-        linewidth=1.5,
+        linewidth=2.0,
         linestyle=lstyles[j],
         linecolor=lcolor[j])
 end
